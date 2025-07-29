@@ -1,8 +1,8 @@
 /**
  * @file: kernel/irq/8295A.c
- * @author: lhxl
- * @data: 2025-5-3
- * @version: build10
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 #include <kernel/lib/lib.h>
@@ -14,16 +14,17 @@
 
 void init_8259A()
 {
-	__port_write_byte(0x20, 0x11);	// master.ICW1
-	__port_write_byte(0x21, 0x20);	// master.ICW2
-	__port_write_byte(0x21, 0x4);	// master.ICW3
-	__port_write_byte(0x21, 0x1);	// master.ICW4
-	__port_write_byte(0xA0, 0x11);	// slaver.ICW1
-	__port_write_byte(0xA1, 0x28);	// slaver.ICW2
-	__port_write_byte(0xA1, 0x2);	// slaver.ICW3
-	__port_write_byte(0xA1, 0x1);	// slaver.ICW4
-	__port_write_byte(0x21, 0xFF);	// master.OCW1
-	__port_write_byte(0xA1, 0xFF);	// slaver.OCW1
+	_color_printk(ORANGE, BLACK, "init_8259A()\n");
+	_port_write_byte(0x20, 0x11);	// master.ICW1
+	_port_write_byte(0x21, 0x20);	// master.ICW2
+	_port_write_byte(0x21, 0x4);	// master.ICW3
+	_port_write_byte(0x21, 0x1);	// master.ICW4
+	_port_write_byte(0xA0, 0x11);	// slaver.ICW1
+	_port_write_byte(0xA1, 0x28);	// slaver.ICW2
+	_port_write_byte(0xA1, 0x2);	// slaver.ICW3
+	_port_write_byte(0xA1, 0x1);	// slaver.ICW4
+	_port_write_byte(0x21, 0xFF);	// master.OCW1
+	_port_write_byte(0xA1, 0xFF);	// slaver.OCW1
 	for (int i = 0; i < NR_IRQ; i++)
 	{
 		irq_table[i] = default_irq_handler;
@@ -32,12 +33,11 @@ void init_8259A()
 
 void default_irq_handler()
 {
-	__printk("irq!\n");
-	return;
+	_printk("irq!\n");
 }
 
-void __put_irq_handler(int irq, irq_handler handler)
+void _put_irq_handler(int irq, irq_handler handler)
 {
-	__disable_irq(irq);
+	_disable_irq(irq);
 	irq_table[irq] = handler;
 }

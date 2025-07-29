@@ -1,12 +1,12 @@
 /**
  * @file: include/kernel/gate.h
- * @author: lhxl
- * @data: 2025-4-17
- * @version: build7
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
-#ifndef __KERNEL_GATE_H_
-#define __KERNEL_GATE_H_
+#ifndef _KERNEL_GATE_H_
+#define _KERNEL_GATE_H_
 
 #include <kernel/types.h>
 
@@ -33,13 +33,14 @@ struct Gate
 #define DA_386IGate 0x8E    // interrupt gate
 #define DA_386TGate 0x8F    // trap gate(unused)
 
-#define LOAD_TR(n) do{\
-	__asm__ __volatile(\
-		"	ltr		%%ax"\
-		:\
-		: "a"(n << 3)\
-		: "memory"\
-	);\
-} while (0);
+#define LOAD_TR(n)	\
+do{	\
+	__asm__ __volatile(	\
+		"	ltr		%%ax	\n\t"	\
+		:	\
+		: "a"(n << 3)	\
+		: "memory"	\
+	);	\
+} while (0)
 
 #endif

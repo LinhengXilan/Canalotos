@@ -1,9 +1,9 @@
-; @file: kernel/fault.asm
-; @author: lhxl
-; @data: 2025-5-3
-; @version: build9
+; @file: kernel/entry.asm
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
-%macro GET_CURRENT 1
+%macro GET_CURRENT  1
 	mov     %1, -32768
 	and     %1, rsp
 %endmacro
@@ -33,26 +33,26 @@ REG_RFLAGS  equ 0xA8
 REG_OLDRSP  equ 0xB0
 REG_OLDSS   equ 0xB8
 
-global __divide_error
-global __debug
-global __nmi
-global __breakpoint
-global __overflow
-global __bounds
-global __undefined_opcode
-global __device_not_available
-global __double_fault
-global __coprocessor_segment_overrun
-global __invalid_TSS
-global __segment_not_present
-global __stack_segment_fault
-global __general_protection
-global __page_fault
-global __x87_FPU_error
-global __alignment_check
-global __machine_check
-global __SIMD_exception
-global __virtualization_exception
+global _divide_error
+global _debug
+global _nmi
+global _breakpoint
+global _overflow
+global _bounds
+global _undefined_opcode
+global _device_not_available
+global _double_fault
+global _coprocessor_segment_overrun
+global _invalid_TSS
+global _segment_not_present
+global _stack_segment_fault
+global _general_protection
+global _page_fault
+global _x87_FPU_error
+global _alignment_check
+global _machine_check
+global _SIMD_exception
+global _virtualization_exception
 
 extern do_divide_error
 extern do_debug
@@ -132,21 +132,21 @@ error_code:
 	mov     rdi, rsp
 	call    rdx
 	jmp     ret_from_exception
-__divide_error:
+_divide_error:
 	push    0
 	push    rax
 	lea     rax, [rel do_divide_error]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__debug:
+_debug:
 	push    0
 	push    rax
 	lea     rax, [rel do_debug]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__nmi:
+_nmi:
 	push	rax
 	cld
 	push    rax
@@ -178,113 +178,113 @@ __nmi:
 	call    do_nmi
 	jmp     RestoreRegister
 
-__breakpoint:
+_breakpoint:
 	push    0
 	push    rax
 	lea     rax, [rel do_breakpoint]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__overflow:
+_overflow:
 	push    0
 	push    rax
 	lea     rax, [rel do_overflow]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__bounds:
+_bounds:
 	push    0
 	push    rax
 	lea     rax, [rel do_bounds]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__undefined_opcode:
+_undefined_opcode:
 	push    0
 	push    rax
 	lea     rax, [rel do_undefined_opcode]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__device_not_available:
+_device_not_available:
 	push    0
 	push    rax
 	lea     rax, [rel do_device_not_available]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__double_fault:
+_double_fault:
 	push    0
 	push    rax
 	lea     rax, [rel do_double_fault]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__coprocessor_segment_overrun:
+_coprocessor_segment_overrun:
 	push    0
 	push    rax
 	lea     rax, [rel do_coprocessor_segment_overrun]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__invalid_TSS:
+_invalid_TSS:
 	push    rax
 	lea     rax, [rel do_invalid_TSS]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__segment_not_present:
+_segment_not_present:
 	push    rax
 	lea     rax, [rel do_segment_not_present]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__stack_segment_fault:
+_stack_segment_fault:
 	push    rax
 	lea     rax, [rel do_stack_segment_fault]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__general_protection:
+_general_protection:
 	push    rax
 	lea     rax, [rel do_general_protection]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__page_fault:
+_page_fault:
 	push    rax
 	lea     rax, [rel do_page_fault]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__x87_FPU_error:
+_x87_FPU_error:
 	push    0
 	push    rax
 	lea     rax, [rel do_x87_FPU_error]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__alignment_check:
+_alignment_check:
 	push    rax
 	lea     rax, [rel do_alignment_check]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__machine_check:
+_machine_check:
 	push    0
 	push    rax
 	lea     rax, [rel do_machine_check]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__SIMD_exception:
+_SIMD_exception:
 	push    0
 	push    rax
 	lea     rax, [rel do_SIMD_exception]
 	xchg    [rsp], rax
 	jmp     error_code
 
-__virtualization_exception:
+_virtualization_exception:
 	push    0
 	push    rax
 	lea     rax, [rel do_virtualization_exception]

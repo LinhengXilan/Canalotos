@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/init.h
- * @author: lhxl
- * @data: 2025-5-3
- * @version: build10
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 #ifndef _KERNEL_INIT_H
@@ -13,5 +13,6 @@ void init_IDT();
 void init_memory();
 void init_8259A();
 void init_keyboard();
+void init_process();
 
 #endif

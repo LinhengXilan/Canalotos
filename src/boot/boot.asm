@@ -1,18 +1,18 @@
 ; @file: boot/boot.asm
-; @author: lhxl
-; @data: 2025-5-1
-; @version: build8
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
-BaseOfStack         equ	0x7c00
+BaseOfStack         equ	0x7C00
 BaseOfLoader        equ 0x1000
 OffsetOfLoader      equ 0
 
-	org     0x7c00
-	jmp     short __Start
+	org     0x7C00
+	jmp     short _Start
 	nop
 %include "FAT12.inc"
 
-__Start:
+_Start:
 	mov	    ax,	cs
 	mov	    ds,	ax
 	mov	    es,	ax
@@ -36,7 +36,7 @@ __Start:
 
 ; Search for loader.
 	mov     word [sectorNo], SectorNumOfRootDir
-__SearchFile:
+_SearchFile:
 	cmp     word [rootDirSize], 0
 	jz      .FileNotFound
 	dec     word [rootDirSize]
@@ -45,7 +45,7 @@ __SearchFile:
 	mov     bx, 0x8000
 	mov     ax, [sectorNo]
 	mov     cl, 1
-	call    __ReadSector
+	call    _ReadSector
 	mov     si, LoaderFileName
 	mov     di, 0x8000
 	cld
@@ -73,7 +73,7 @@ __SearchFile:
 	jmp     .SearchLoader
 .NextSector:
 	add     word [sectorNo], 1
-	jmp     __SearchFile
+	jmp     _SearchFile
 .FileNotFound:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
@@ -101,9 +101,9 @@ __SearchFile:
 ; Get the FATs of loader.bin and call ReadSector to load it to memory until FAT=0xFFF.
 .LoadFile:
 	mov     cl, 1
-	call    __ReadSector
+	call    _ReadSector
 	pop     ax
-	call    __GetFATEntry
+	call    _GetFATEntry
 	cmp     ax, 0xFFF
 	jz      .FileLoaded
 	push    ax
@@ -115,9 +115,9 @@ __SearchFile:
 .FileLoaded:
 	jmp     BaseOfLoader:OffsetOfLoader
 
-; void __ReadSector(ax=sectorToRead, cl=numOfSectors, es:bx=buffer);
+; void _ReadSector(ax=sectorToRead, cl=numOfSectors, es:bx=buffer);
 ; Read sector.
-__ReadSector:
+_ReadSector:
 	push    bp
 	mov     bp, sp
 	sub     esp, 2
@@ -142,9 +142,9 @@ __ReadSector:
 	pop     bp
 	ret
 
-; bool __GetFATEntry(ah=numOfFAT) -> [odd];
+; bool _GetFATEntry(ah=numOfFAT) -> [odd];
 ; Get FAt Entry.
-__GetFATEntry:
+_GetFATEntry:
 	push    es
 	push    bx
 	push    ax
@@ -167,7 +167,7 @@ __GetFATEntry:
 	mov     bx, 0x8000
 	add     ax, SectorNumOfFAT1
 	mov     cl, 2
-	call    __ReadSector
+	call    _ReadSector
 	pop     dx
 	add     bx, dx
 	mov     ax, [es:bx]

@@ -1,28 +1,28 @@
 /**
  * @file: kernel/main.c
- * @author: lhxl
- * @data: 2025-5-3
- * @version: build9
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
-#include <kernel/const.h>
+#include <kernel/tss.h>
 #include <kernel/gate.h>
-#include <kernel/global.h>
-#include <kernel/interrupt.h>
-#include <kernel/printk.h>
 #include <kernel/init.h>
+#include <kernel/global.h>
 #include <kernel/memory.h>
 
-void __kernel_main()
+/**
+ * @note 地址: 0x104000
+ */
+void _kernel_main()
 {
 	init_screen();
 	init_IDT();
-	LOAD_TR(8)
-	set_tss(0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00);
+	LOAD_TR(10);
+	set_tss(stack_start, stack_start, stack_start, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00, 0xFFFF800000007C00);
 	init_memory();
-	struct Page* page = nullptr;
-	page = alloc_page(ZONE_NORMAL, 64, PAGE_TABLE_MAPPED | PAGE_ACTIVE | PAGE_KERNEL);
 	init_8259A();
+	init_process();	// 0x1040B8
     while (1)
     {
 

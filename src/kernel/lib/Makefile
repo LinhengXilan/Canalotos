@@ -1,16 +1,14 @@
-#	@file: lib/Makefile
-#   @author: lhxl
-#   @data: 2025-5-3
-#	@version: build9
+#	@file: kernel/lib/Makefile
+#   @author: LinhengXilan
+#   @data: 2025-7-29
+#	@version: build11
 
-ObjectFile = ../../../Canalotos/obj/kernel/lib/
-
-C_INCLUDE = ../../include
+ObjectFile = $(TObjectFile)kernel/lib/
 
 obj = $(ObjectFile)string.o\
 	$(ObjectFile)lib.o
 
-.PHONY: all
+.PHONY: all clear
 
 all: mkdir build
 
@@ -20,6 +18,9 @@ ifeq ($(wildcard $(ObjectFile)),)
 endif
 
 build: $(obj)
+
+clear:
+	rm -rf $(ObjectFile)
 
 $(ObjectFile)%.o: %.asm
 	$(ASM) $< $(ASMFLAGS) -o $@

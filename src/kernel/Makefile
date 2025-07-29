@@ -1,27 +1,28 @@
 # @file: kernel/Makefile
-# @author: lhxl
-# @data: 2025-5-3
-# @version: build9
+# @author: LinhengXilan
+# @data: 2025-7-29
+# @version: build11
 
-OutputFile = ../../Canalotos/bin/kernel/
-ObjectFile = ../../Canalotos/obj/kernel/
+OutputFile = $(TOutputFile)kernel/
+ObjectFile = $(TObjectFile)kernel/
 ImgFile = ../../Canalotos/img/
-
-C_INCLUDE = ../include
 
 obj = $(ObjectFile)head.o\
 	$(ObjectFile)main.o\
-	$(ObjectFile)printk.o\
 	$(ObjectFile)global.o\
-	$(ObjectFile)interrupt.o\
-	$(ObjectFile)fault.o\
+	$(ObjectFile)printk.o\
 	$(ObjectFile)memory.o\
+	$(ObjectFile)entry.o\
+	$(ObjectFile)interrupt.o\
+	$(ObjectFile)keyboard.o\
 	$(ObjectFile)lib/lib.o\
 	$(ObjectFile)lib/string.o\
+	$(ObjectFile)irq/8259A.o \
 	$(ObjectFile)irq/irq.o\
-	$(ObjectFile)irq/8259A.o
+	$(ObjectFile)process/process.o \
+	$(ObjectFile)process/switch.o
 
-.PHONY: all
+.PHONY: all clear
 
 all: mkdir build_sub build image
 
@@ -36,13 +37,22 @@ endif
 build_sub:
 	cd lib && $(MAKE)
 	cd irq && $(MAKE)
+	cd process && $(MAKE)
 
 build: $(OutputFile)kernel.bin
 
 image:
+	mount $(ImgFile)boot.img /mnt/floppy -o loop
 	cp -fv $(OutputFile)kernel.bin /mnt/floppy/
 	sync
 	umount /mnt/floppy
+
+clear:
+	cd lib && $(MAKE) clear
+	cd irq && $(MAKE) clear
+	cd process && $(MAKE) clear
+	rm -rf $(OutputFile)
+	rm -rf $(ObjectFile)
 
 $(ObjectFile)%.o: %.asm
 	$(ASM) $< $(ASMFLAGS) -o $@

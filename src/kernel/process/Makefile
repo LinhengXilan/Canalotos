@@ -1,12 +1,12 @@
-#	@file: kernel/irq/Makefile
+#	@file: kernel/process/Makefile
 #   @author: LinhengXilan
 #   @data: 2025-7-29
 #	@version: build11
 
-ObjectFile = $(TObjectFile)kernel/irq/
+ObjectFile = $(TObjectFile)kernel/process/
 
-obj = $(ObjectFile)8259A.o\
-	$(ObjectFile)irq.o
+obj = $(ObjectFile)process.o\
+	$(ObjectFile)switch.o
 
 .PHONY: all clear
 

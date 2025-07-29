@@ -1,12 +1,12 @@
 ; @file: boot/loader.asm
-; @author: lhxl
-; @data: 2025-5-1
-; @version: build8
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
 %include "macro.inc"
 
 	org     0x10000
-	jmp     __Start
+	jmp     _Start
 
 %include "FAT12.inc"
 
@@ -38,7 +38,7 @@ GDTSelector_Kernel_Data	equ	GDT_Kernel_Data - GDT
 
 [section .s16]
 [bits 16]
-__Start:
+_Start:
 	mov	ax, cs
 	mov	ds, ax
 	mov	es, ax
@@ -47,9 +47,9 @@ __Start:
 	mov	sp, 0x7C00
 ; Open address A20.
 	push    ax
-	in      al, 92h
-	or      al, 00000010b
-	out     92h, al
+	in      al, 0x92
+	or      al, 0b00000010
+	out     0x92, al
 	pop     ax
 	cli
 	lgdt    [GdtPtr32]
@@ -68,7 +68,7 @@ __Start:
 	int     0x13
 ; Search kernel.bin.
 	mov     word [SectorNo], SectorNumOfRootDir
-__SearchInRootDir:
+_SearchInRootDir:
 	cmp     word [RootDirSize], 0
 	jz      .NoKernel
 	dec     word [RootDirSize]
@@ -77,7 +77,7 @@ __SearchInRootDir:
 	mov     bx, 0x8000
 	mov     ax, [SectorNo]
 	mov     cl, 1
-	call    __ReadSector
+	call    _ReadSector
 	mov     si, KernelFile
 	mov     di, 0x8000
 	cld
@@ -105,7 +105,7 @@ __SearchInRootDir:
 	jmp     .SearchForKernel
 .GotoNextSector:
 	add     word [SectorNo], 1
-	jmp     __SearchInRootDir
+	jmp     _SearchInRootDir
 .NoKernel:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
@@ -132,7 +132,7 @@ __SearchInRootDir:
 	mov     ax, cx
 .GoOnLoadingFile:
 	mov	    cl, 1
-	call    __ReadSector
+	call    _ReadSector
 	pop     ax
 	push    cx
 	push    eax
@@ -147,12 +147,12 @@ __SearchInRootDir:
 	mov     ax, BaseTmpOfKernel
 	mov     ds, ax
 	mov     esi, OffsetTmpOfKernel
-__MoveKernel:
+_MoveKernel:
 	mov     al, byte [ds:esi]
 	mov     byte [fs:edi], al
 	inc     esi
 	inc     edi
-	loop	__MoveKernel
+	loop	_MoveKernel
 	mov     eax, 0x1000
 	mov     ds, eax
 	mov     dword [OffsetOfKernelCount], edi
@@ -162,19 +162,19 @@ __MoveKernel:
 	pop     fs
 	pop     eax
 	pop     cx
-	call	__GetFATEntry
+	call	_GetFATEntry
 	cmp     ax, 0xFFF
 	jz      .FileLoaded
 	push    ax
 	mov     dx, RootDirSectors
 	add     ax, dx
 	add     ax, SectorBalance
-	jmp	    __SearchInRootDir.GoOnLoadingFile
+	jmp	    _SearchInRootDir.GoOnLoadingFile
 .FileLoaded:
 	mov     ax, 0xB800
 	mov     gs, ax
 
-__KillMotor:
+_KillMotor:
 	push    dx
 	mov     dx, 0x3F2
 	mov     al, 0
@@ -185,7 +185,7 @@ __KillMotor:
 	mov     ax, 0
 	mov     es, ax
 	mov     di, MemoryStructBuffer
-__GetMemoryStruct:
+_GetMemoryStruct:
 	mov     eax, 0xE820
 	mov     ecx, 20
 	mov     edx, 0x534D4150
@@ -194,7 +194,7 @@ __GetMemoryStruct:
 	add     di, 20
 	inc     dword [MemStructNumber]
 	cmp     ebx, 0
-	jne     __GetMemoryStruct
+	jne     _GetMemoryStruct
 	jmp     .GetMemorySuccess
 .GetMemoryFail:
 	mov	dword [MemStructNumber], 0
@@ -209,7 +209,7 @@ __GetMemoryStruct:
 	mov     bp, MSG_GetMemStructError
 	int     0x10
 .GetMemorySuccess:
-__GetSVGAInfo:
+_GetSVGAInfo:
 	mov     ax, 0
 	mov     es, ax
 	mov     di, 0x8000
@@ -236,7 +236,7 @@ __GetSVGAInfo:
 	mov     si, 0x800E
 	mov     esi, dword [es:si]
 	mov     edi, 0x8200
-__GetSVGAMode:
+_GetSVGAMode:
 	mov     cx, word [es:esi]
 	cmp     cx, 0xFFFF
 	jz      .GetSVGAModeFinish
@@ -247,7 +247,7 @@ __GetSVGAMode:
 	inc     dword [SVGAModeCounter]
 	add     esi, 2
 	add     edi, 0x100
-	jmp     __GetSVGAMode
+	jmp     _GetSVGAMode
 .GetSVGAModeFail:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
@@ -273,11 +273,11 @@ __GetSVGAMode:
 	mov     eax, cr0
 	or      eax, 1
 	mov     cr0, eax
-	jmp     dword GDTSelector_Kernel_Code32:__GoToTempProtect
+	jmp     dword GDTSelector_Kernel_Code32:_GoToTempProtect
 
 [SECTION .s32]
 [BITS 32]
-__GoToTempProtect:
+_GoToTempProtect:
 ; Enter temp long mode.
 	mov     ax, 0x10
 	mov     ds, ax
@@ -285,19 +285,28 @@ __GoToTempProtect:
 	mov     fs, ax
 	mov     ss, ax
 	mov     esp, 0x7E00
-	call    __Support_long_mode
+	call    _Support_long_mode
 	test    eax, eax
 	jz	no_support
 ; Setup temporary page table.
-	mov     dword [0x90000], 0x91007
-	mov     dword [0x90800], 0x91007
-	mov     dword [0x91000], 0x92007
-	mov     dword [0x92000], 0x000083
-	mov     dword [0x92008], 0x200083
-	mov     dword [0x92010], 0x400083
-	mov     dword [0x92018], 0x600083
-	mov     dword [0x92020], 0x800083
-	mov     dword [0x92028], 0xa00083
+	mov dword [0x90000], 0x91007
+	mov dword [0x90004], 0x00000
+	mov dword [0x90800], 0x91007
+	mov dword [0x90804], 0x00000
+	mov dword [0x91000], 0x92007
+	mov dword [0x91004], 0x00000
+	mov dword [0x92000], 0x000083
+	mov dword [0x92004], 0x000000
+	mov dword [0x92008], 0x200083
+	mov dword [0x9200c], 0x000000
+	mov dword [0x92010], 0x400083
+	mov dword [0x92014], 0x000000
+	mov dword [0x92018], 0x600083
+	mov dword [0x9201c], 0x000000
+	mov dword [0x92020], 0x800083
+	mov dword [0x92024], 0x000000
+	mov dword [0x92028], 0xa00083
+	mov dword [0x9202c], 0x000000
 
 	lgdt    [GdtPtr]
 	mov     ax, 0x10
@@ -324,11 +333,11 @@ __GoToTempProtect:
 	bts     eax, 0
 	bts     eax, 31
 	mov     cr0, eax
-	jmp     GDTSelector_Kernel_Code:OffsetOfKernel
+	jmp     GDTSelector_Kernel_Code:OffsetOfKernel  ;0x1036b
 
 [section .lib16]
 [bits 16]
-__ReadSector:
+_ReadSector:
 	push    bp
 	mov     bp, sp
 	sub     esp, 2
@@ -353,7 +362,7 @@ __ReadSector:
 	pop     bp
 	ret
 
-__GetFATEntry:
+_GetFATEntry:
 	push    es
 	push    bx
 	push    ax
@@ -376,7 +385,7 @@ __GetFATEntry:
 	mov     bx, 0x8000
 	add     ax, SectorNumOfFAT1
 	mov     cl, 2
-	call    __ReadSector
+	call    _ReadSector
 	pop     dx
 	add     bx, dx
 	mov     ax, [es:bx]
@@ -391,7 +400,7 @@ __GetFATEntry:
 
 [section .lib32]
 [bits 32]
-__Support_long_mode:
+_Support_long_mode:
 	mov     eax, 0x80000000
 	cpuid
 	cmp     eax, 0x80000001

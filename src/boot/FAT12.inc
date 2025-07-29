@@ -1,7 +1,7 @@
 ; @file: boot/FAT12.inc
-; @author: lhxl
-; @data: 2025-4-12
-; @version: build5
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
 RootDirSectors      equ 14
 SectorNumOfRootDir  equ 19

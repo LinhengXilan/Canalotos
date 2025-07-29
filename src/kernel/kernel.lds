@@ -1,16 +1,16 @@
 /**
  * @file: kernel/kernel.lds
- * @author: lhxl
- * @data: 2025-4-14
- * @version: build6
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 OUTPUT_FORMAT("elf64-x86-64", "elf64-x86-64", "elf64-x86-64")
 OUTPUT_ARCH(i386:x86-64)
-ENTRY(__start)
+ENTRY(_start)
 SECTIONS
 {
-	. = 0xffff800000100000;
+	. = 0xFFFF800000100000;
 	.text :
 	{
 		_text = .;
@@ -23,6 +23,17 @@ SECTIONS
 		_data = .;
 		*(.data)
 		_edata = .;
+	}
+	.rodata :
+	{
+		_rodata = .;
+		*(.rodata)
+		_erodata = .;
+	}
+	. = ALIGN(32768);
+	.data._init_process :
+	{
+		*(.data._init_process)
 	}
 	.bss :
 	{

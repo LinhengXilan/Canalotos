@@ -1,7 +1,7 @@
 ; @file: boot/macro.inc
-; @author: lhxl
-; @data: 2025-5-1
-; @version: build8
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
 ; segment attribute
 DA_64           equ 0x2000  ; 64-bit code segment

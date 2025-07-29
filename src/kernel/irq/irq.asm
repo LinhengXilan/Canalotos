@@ -1,10 +1,10 @@
 ; @file: kernel/irq/irq.asm
-; @author: lhxl
-; @data: 2025-5-3
-; @version: build10
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
 %macro irq_master 1
-	call    __save
+	call    _save
 	in      al, 0x21
 	or      al, (1 << %1)
 	out     0x21, al
@@ -22,7 +22,7 @@
 %endmacro
 
 %macro	irq_slave	1
-	call    __save
+	call    _save
 	in      al, 0xA1
 	or      al, (1 << (%1 - 8))
 	out     0xA1, al
@@ -48,29 +48,29 @@ EOI equ 0x20
 
 extern irq_table
 
-global __irq00
-global __irq01
-global __irq02
-global __irq03
-global __irq04
-global __irq05
-global __irq06
-global __irq07
-global __irq08
-global __irq09
-global __irq10
-global __irq11
-global __irq12
-global __irq13
-global __irq14
-global __irq15
+global _irq00
+global _irq01
+global _irq02
+global _irq03
+global _irq04
+global _irq05
+global _irq06
+global _irq07
+global _irq08
+global _irq09
+global _irq10
+global _irq11
+global _irq12
+global _irq13
+global _irq14
+global _irq15
 
-global __enable_irq
-global __disable_irq
+global _enable_irq
+global _disable_irq
 
 [section .text]
 [bits 64]
-__save:
+_save:
 	cld
 	push    rax
 	push    rax
@@ -97,40 +97,40 @@ __save:
 	mov     ds, rdx
 	mov     es, rdx
 
-__irq00:  ;
+_irq00:  ;
 	irq_master 0
-__irq01:  ;
+_irq01:  ;
 	irq_master 1
-__irq02:  ; cascade
+_irq02:  ; cascade
 	irq_master 2
-__irq03:  ;
+_irq03:  ;
 	irq_master 3
-__irq04:  ;
+_irq04:  ;
 	irq_master 4
-__irq05:  ;
+_irq05:  ;
 	irq_master 5
-__irq06:  ;
+_irq06:  ;
 	irq_master 6
-__irq07:  ;
+_irq07:  ;
 	irq_master 7
-__irq08:  ;
+_irq08:  ;
 	irq_slave 8
-__irq09:  ; irq 2 redirected
+_irq09:  ; irq 2 redirected
 	irq_slave 9
-__irq10:  ;
+_irq10:  ;
 	irq_slave 10
-__irq11:  ;
+_irq11:  ;
 	irq_slave 11
-__irq12:  ;
+_irq12:  ;
 	irq_slave 12
-__irq13:  ;
+_irq13:  ;
 	irq_slave 13
-__irq14:  ;
+_irq14:  ;
 	irq_slave 14
-__irq15:  ;
+_irq15:  ;
 	irq_slave 15
 
-__enable_irq:
+_enable_irq:
 	mov     ecx, edi
 	push    rax
 	cli
@@ -151,7 +151,7 @@ __enable_irq:
 	pop     rax
 	ret
 
-__disable_irq:
+_disable_irq:
 	mov     cx, di
 	push    rax
 	cli

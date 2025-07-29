@@ -1,8 +1,8 @@
 /**
  * @file: kernel/printk.c
- * @author: lhxl
- * @data: 2025-5-3
- * @version: build10
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 
@@ -14,7 +14,7 @@
 
 #include <kernel/printk.h>
 
-PRIVATE char* __itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags);
+PRIVATE char* _itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags);
 
 void init_screen()
 {
@@ -28,12 +28,12 @@ void init_screen()
 	screen.bufferSize = screen.Position.x * screen.Position.y * 4 + PAGE_4K - 1 & PAGE_4K_MASK;
 }
 
-int __printk(const char* format, ...)
+int _printk(const char* format, ...)
 {
 	char buffer[1024] = {0};
 	va_list args;
 	va_start(args, format);
-	int i = __vsprintf(buffer, format, args);
+	int i = _vsprintf(buffer, format, args);
 	va_end(args);
 	for (int j = 0; j < i; j++)
 	{
@@ -47,32 +47,32 @@ int __printk(const char* format, ...)
 		case '\t':
 			do
 			{
-				__putchar(WHITE, BLACK, ' ');
+				_putchar(WHITE, BLACK, ' ');
 			} while (screen.Position.x % (screen.CharSize.x * 4) != 0);
 			continue;
 		case '\'':
-			__putchar(WHITE, BLACK, '\'');
+			_putchar(WHITE, BLACK, '\'');
 			continue;
 		case '\"':
-			__putchar(WHITE, BLACK, '\"');
+			_putchar(WHITE, BLACK, '\"');
 			continue;
 		case '\\':
-			__putchar(WHITE, BLACK, '\\');
+			_putchar(WHITE, BLACK, '\\');
 			continue;
 		default:
 			break;
 		}
-		__putchar(WHITE, BLACK, buffer[j]);
+		_putchar(WHITE, BLACK, buffer[j]);
 	}
 	return i;
 }
 
-int __color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
+int _color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
 {
 	char buffer[1024] = {0};
 	va_list args;
 	va_start(args, format);
-	int i = __vsprintf(buffer, format, args);
+	int i = _vsprintf(buffer, format, args);
 	va_end(args);
 	for (int j = 0; j < i; j++)
 	{
@@ -86,27 +86,27 @@ int __color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
 		case '\t':
 			do
 			{
-				__putchar(frontColor, backgroundColor, ' ');
+				_putchar(frontColor, backgroundColor, ' ');
 			} while (screen.Position.x % (screen.CharSize.x * 4) != 0);
 			continue;
 		case '\'':
-			__putchar(frontColor, backgroundColor, '\'');
+			_putchar(frontColor, backgroundColor, '\'');
 			continue;
 		case '\"':
-			__putchar(frontColor, backgroundColor, '\"');
+			_putchar(frontColor, backgroundColor, '\"');
 			continue;
 		case '\\':
-			__putchar(frontColor, backgroundColor, '\\');
+			_putchar(frontColor, backgroundColor, '\\');
 			continue;
 		default:
 			break;
 		}
-		__putchar(frontColor, backgroundColor, buffer[j]);
+		_putchar(frontColor, backgroundColor, buffer[j]);
 	}
 	return i;
 }
 
-int __vsprintf(char* buffer, const char* format, va_list args)
+int _vsprintf(char* buffer, const char* format, va_list args)
 {
 	char* pbuffer = buffer;
 	u8 flag_format = FALSE;
@@ -132,13 +132,13 @@ int __vsprintf(char* buffer, const char* format, va_list args)
 			case 'b':
 				if (flag_long == TRUE)
 				{
-					pbuffer = __itoa(pbuffer, va_arg(args, u64), 2, precision, TRUE);
+					pbuffer = _itoa(pbuffer, va_arg(args, u64), 2, precision, TRUE);
 					flag_format = FALSE;
 					flag_long = FALSE;
 				    precision = 0;
 					break;
 				}
-				pbuffer = __itoa(pbuffer, va_arg(args, u32), 2, precision, TRUE);
+				pbuffer = _itoa(pbuffer, va_arg(args, u32), 2, precision, TRUE);
 				flag_format = FALSE;
 			    precision = 0;
 				break;
@@ -149,14 +149,14 @@ int __vsprintf(char* buffer, const char* format, va_list args)
 			case 'd':
 				if (flag_long == TRUE)
 				{
-					pbuffer = __itoa(pbuffer, va_arg(args, u64), 10, precision, flag);
+					pbuffer = _itoa(pbuffer, va_arg(args, u64), 10, precision, flag);
 					flag_format = FALSE;
 					flag_long = FALSE;
 					flag = FALSE;
 				    precision = 0;
 					break;
 				}
-				pbuffer = __itoa(pbuffer, va_arg(args, u32), 10, precision, flag);
+				pbuffer = _itoa(pbuffer, va_arg(args, u32), 10, precision, flag);
 				flag_format = FALSE;
 				flag = FALSE;
 			    precision = 0;
@@ -167,13 +167,13 @@ int __vsprintf(char* buffer, const char* format, va_list args)
 			case 'o':
 				if (flag_long == TRUE)
 				{
-					pbuffer = __itoa(pbuffer, va_arg(args, u64), 8, precision, TRUE);
+					pbuffer = _itoa(pbuffer, va_arg(args, u64), 8, precision, TRUE);
 					flag_format = FALSE;
 					flag_long = FALSE;
 				    precision = 0;
 					break;
 				}
-				pbuffer = __itoa(pbuffer, va_arg(args, u32), 8, precision, TRUE);
+				pbuffer = _itoa(pbuffer, va_arg(args, u32), 8, precision, TRUE);
 				flag_format = FALSE;
 			    precision = 0;
 				break;
@@ -192,13 +192,13 @@ int __vsprintf(char* buffer, const char* format, va_list args)
 			case 'x':
 				if (flag_long == TRUE)
 				{
-					pbuffer = __itoa(pbuffer, va_arg(args, u64), 16, precision, TRUE);
+					pbuffer = _itoa(pbuffer, va_arg(args, u64), 16, precision, TRUE);
 					flag_format = FALSE;
 					flag_long = FALSE;
 				    precision = 0;
 					break;
 				}
-				pbuffer = __itoa(pbuffer, va_arg(args, u32), 16, precision, TRUE);
+				pbuffer = _itoa(pbuffer, va_arg(args, u32), 16, precision, TRUE);
 				flag_format = FALSE;
 			    precision = 0;
 				break;
@@ -217,7 +217,7 @@ int __vsprintf(char* buffer, const char* format, va_list args)
 	return pbuffer - buffer;
 }
 
-void __putchar(u32 frontColor, u32 backgroundColor, u8 character)
+void _putchar(u32 frontColor, u32 backgroundColor, u8 character)
 {
 	u32* base_addr = screen.bufferAddress;
 	u16 x = screen.Position.x;
@@ -242,7 +242,7 @@ void __putchar(u32 frontColor, u32 backgroundColor, u8 character)
 	}
 }
 
-PRIVATE char* __itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags)
+PRIVATE char* _itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags)
 {
     u64 temp = number;
 	s64 stemp = (s64)number;

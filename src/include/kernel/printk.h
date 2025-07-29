@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/printk.h
- * @author: lhxl
- * @data: 2025-4-12
- * @version: build5
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 #ifndef _KERNEL_PRINTK_H
@@ -10,9 +10,9 @@
 
 #include <stdarg.h>
 
-int __printk(const char* format, ...);
-int __color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...);
-int __vsprintf(char* buffer, const char* format, va_list args);
-void __putchar(u32 frontColor, u32 backgroundColor, u8 character);
+int _printk(const char* format, ...);
+int _color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...);
+int _vsprintf(char* buffer, const char* format, va_list args);
+void _putchar(u32 frontColor, u32 backgroundColor, u8 character);
 
 #endif

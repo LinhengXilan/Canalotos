@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/memory.h
- * @author: lhxl
- * @data: 2025-5-1
- * @version: build8
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
 #ifndef _KERNEL_MEMORY_H
@@ -51,7 +51,7 @@ struct MemoryDescriptor
 	u64 end_of_mem_desc;	///< end address of memory struct
 };
 
-#define PAGE_OFFSET (u64)0xFFFF800000000000
+#define PAGE_OFFSET ((u64)0xFFFF800000000000)
 
 #define PAGE_4K_SHIFT 12
 #define PAGE_2M_SHIFT 21
@@ -138,8 +138,31 @@ struct Zone
 #define ZONE_NORMAL		0x2
 #define ZONE_UNMAPPED	0x4
 
-u64 page_init(struct Page* page, u64 flags);
-u64 page_clean(struct Page* page);
+#define flush_tlb()	\
+do	\
+{	\
+	u64 temp;	\
+	__asm__ __volatile__(	\
+		"	movq	%%cr3, %0	\n\t"	\
+		"	movq	%0, %%cr3	\n\t"	\
+		: "=r"(temp)	\
+		:	\
+		: "memory"	\
+	);	\
+} while(0);
+
+inline u64* get_gdt()
+{
+	u64* temp;
+	__asm__ __volatile__(
+		"	movq	%%cr3, %0	\n\t"
+		: "=r"(temp)
+		:
+		: "memory"
+	);
+	return temp;
+}
+
 struct Page* alloc_page(u64 zone_type, u64 number, u64 flags);
 
 #endif

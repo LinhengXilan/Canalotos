@@ -1,16 +1,23 @@
 ; @file: kernel/head.asm
-; @author: lhxl
-; @data: 2025-5-1
-; @version: build8
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
 %include "macro.inc"
 
-extern __kernel_main
-extern __color_printk
+extern _kernel_main
+extern _color_printk
+extern _init_process
+
+global _start
+global stack_start
+
+process_struct_size    equ 64
+process_stack_size     equ 32768
 
 [section .text]
-global __start
-__start:
+[bits 64]
+_start:
 	mov     ax, Selector_Kernel_Data
 	mov     ds, ax
 	mov     es, ax
@@ -41,7 +48,7 @@ Entry:
 	mov     es, rax
 	mov     gs, rax
 	mov     ss, rax
-	mov     rsp, 0xFFFF800000007E00
+	mov     rsp, [rel stack_start]
 
 ; Init the IDT = { 0, offset:16~63, attribute, segment selector, offset:0~15 }.
 Init_IDT:
@@ -82,9 +89,10 @@ Init_TSS:
 	shl     rcx, 16
 	add     rax, rcx            ; segment base 16~23
 	add     rax, 103            ; segment limit(length of TSS)
-	mov     qword [rel GDT_TSS0], rax
+	lea     rdi, [rel GDT]
+	mov     [rdi + 80], rax
 	shr     rdx, 32
-	mov     qword [rel GDT_TSS1], rdx
+	mov     [rdi + 88], rdx
 	; jump to kernel
 	mov     rax, [rel IStartKernel]
 	push    Selector_Kernel_Code
@@ -93,7 +101,7 @@ Init_TSS:
 	retf
 
 IStartKernel:
-	dq      __kernel_main
+	dq      _kernel_main
 
 ; The default interrupt handler save all general registers and print message "Unknown Interrupt".
 ignore_int:
@@ -126,7 +134,7 @@ ignore_int:
     mov     rsi, 0
     mov     rdi, 0x00FF0000
     mov     rax, 0
-    call    __color_printk
+    call    _color_printk
     add     rsp, 0x8
 Loop:
     jmp     Loop
@@ -151,21 +159,25 @@ Loop:
     pop     rax
     iret
 
+stack_start:
+	dq  _init_process + 32768
 align 8
 	times   0x1000 - ($ - $$) db 0
-__PML4E:
+_PML4E:
 	dq      0x102007
 	resq    255
 	dq      0x102007
 	resq    255
 
 	times   0x2000 - ($ - $$) db 0
-__PDPTE:
+_PDPTE:
 	dq      0x103003
 	resq    511
 
 	times   0x3000 - ($ - $$) db 0
-__PDE:
+_PDE:
+
+
 	dq      0x83
 	dq      0x200083
 	dq      0x400083
@@ -183,26 +195,26 @@ __PDE:
 
 [section .data]
 global GDT
-GDT:
+GDT:                ; 0x0000000000000000
 	Descriptor 0
-GDT_Kernel_Code:
+GDT_Kernel_Code:    ; 0x0020980000000000
 	Descriptor DA_64 | DA_C
-GDT_Kernel_Data:
+GDT_Kernel_Data:    ; 0x0000920000000000
 	Descriptor DA_DRW
-GDT_User_Code:
+GDT_User_Code:      ; 0x0020F80000000000
 	Descriptor DA_64 | DA_C | DA_DPL3
-GDT_User_Data:
+GDT_User_Data:      ; 0x0000F20000000000
 	Descriptor DA_DRW | DA_DPL3
-GDT_Kernel_Code32:
+GDT_User_Code32:
+	Descriptor32 0x00000000, 0x00000, 0
+GDT_User_Data32:
+    Descriptor32 0x00000000, 0x00000, 0
+GDT_Kernel_Code32:  ; 0x00CF9A000000FFFF
 	Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_CR
-GDT_Kernel_Data32:
+GDT_Kernel_Data32:  ; 0x00CF92000000FFFF
 	Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_DRW
-GDT_NULL:
-	Descriptor 0
 GDT_TSS0:
-	dq      0
-GDT_TSS1:
-	dq      0
+	resq    10
 GDT_Length equ $ - GDT
 GDT_Pointer:
 	dw      GDT_Length - 1

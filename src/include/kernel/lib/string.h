@@ -1,16 +1,16 @@
 /**
  * @file: kernel/lib/string.h
- * @author: lhxl
- * @data: 2025-4-12
- * @version: build5
+ * @author: LinhengXilan
+ * @data: 2025-7-29
+ * @version: build11
  **/
 
-#ifndef __LIB_STRING_H_
-#define __LIB_STRING_H_
+#ifndef _LIB_STRING_H_
+#define _LIB_STRING_H_
 
 size_t strlen(const char* str);
 void* memcpy(void* p_dst, void* p_src, size_t size);
-void memset(void* p_dst, char ch, size_t size);
+void memset(void* ptr, char ch, size_t size);
 char* strcpy(char* p_dst, char* p_src);
 int memcmp(void* p_dst, void* p_src, size_t size);
 

@@ -1,14 +1,14 @@
 ; @file: kernel/lib/lib.asm
-; @author: lhxl
-; @data: 2025-5-3
-; @version: build10
+; @author: LinhengXilan
+; @data: 2025-7-29
+; @version: build11
 
-global __port_write_byte
-global __port_read_byte
+global _port_write_byte
+global _port_read_byte
 
 [section .text]
 [bits 64]
-__port_write_byte:
+_port_write_byte:
 	mov dx, di
 	mov ax, si
 	out dx, al
@@ -16,7 +16,7 @@ __port_write_byte:
 	nop
 	ret
 
-__port_read_byte:
+_port_read_byte:
 	mov     dx, di
 	xor     al, al
 	in      al, dx
