@@ -1,25 +1,25 @@
-#	@file: kernel/process/Makefile
-#   @author: LinhengXilan
-#   @data: 2025-7-29
-#	@version: build11
+# @file: kernel/process/Makefile
+# @author: LinhengXilan
+# @data: 2025-8-16
+# @version: build12
 
 ObjectFile = $(TObjectFile)kernel/process/
 
 obj = $(ObjectFile)process.o\
 	$(ObjectFile)switch.o
 
-.PHONY: all clear
+.PHONY: all clean
 
 all: mkdir build
 
 mkdir:
 ifeq ($(wildcard $(ObjectFile)),)
-	mkdir $(ObjectFile)
+	mkdir -p $(ObjectFile)
 endif
 
 build: $(obj)
 
-clear:
+clean:
 	rm -rf $(ObjectFile)
 
 $(ObjectFile)%.o: %.asm

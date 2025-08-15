@@ -1,7 +1,7 @@
 ; @file: kernel/head.asm
 ; @author: LinhengXilan
-; @data: 2025-7-29
-; @version: build11
+; @data: 2025-8-16
+; @version: build12
 
 %include "macro.inc"
 
@@ -73,7 +73,7 @@ Load_IDT:
 	jne     Load_IDT
 
 ; Init the TSS
-Init_TSS:
+Setup_TSS:
 	lea     rdx, [rel TSS]
 	xor     rax, rax
 	xor     rcx, rcx
@@ -171,26 +171,24 @@ _PML4E:
 
 	times   0x2000 - ($ - $$) db 0
 _PDPTE:
-	dq      0x103003
+	dq      0x103007
 	resq    511
 
 	times   0x3000 - ($ - $$) db 0
 _PDE:
-
-
-	dq      0x83
-	dq      0x200083
-	dq      0x400083
-	dq      0x600083
-	dq      0x800083
-	dq      0xE0000083
-	dq      0xE0200083
-	dq      0xE0400083
-	dq      0xE0600083
-	dq      0xE0800083
-	dq      0xE0A00083
-	dq      0xE0C00083
-	dq      0xE0E00083
+	dq      0x87
+	dq      0x200087
+	dq      0x400087
+	dq      0x600087
+	dq      0x800087
+	dq      0xE0000087
+	dq      0xE0200087
+	dq      0xE0400087
+	dq      0xE0600087
+	dq      0xE0800087
+	dq      0xE0A00087
+	dq      0xE0C00087
+	dq      0xE0E00087
 	resq    499
 
 [section .data]
@@ -201,14 +199,14 @@ GDT_Kernel_Code:    ; 0x0020980000000000
 	Descriptor DA_64 | DA_C
 GDT_Kernel_Data:    ; 0x0000920000000000
 	Descriptor DA_DRW
+GDT_User_Code32:    ; 0x0000000000000000
+	Descriptor32 0x00000000, 0x00000, 0
+GDT_User_Data32:    ; 0x0000000000000000
+    Descriptor32 0x00000000, 0x00000, 0
 GDT_User_Code:      ; 0x0020F80000000000
 	Descriptor DA_64 | DA_C | DA_DPL3
 GDT_User_Data:      ; 0x0000F20000000000
 	Descriptor DA_DRW | DA_DPL3
-GDT_User_Code32:
-	Descriptor32 0x00000000, 0x00000, 0
-GDT_User_Data32:
-    Descriptor32 0x00000000, 0x00000, 0
 GDT_Kernel_Code32:  ; 0x00CF9A000000FFFF
 	Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_CR
 GDT_Kernel_Data32:  ; 0x00CF92000000FFFF

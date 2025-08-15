@@ -22,16 +22,20 @@ void _disable_irq(int irq);
  * @param member 成员变量名
  * @brief 获取成员变量父结构基地址
  */
-// #define container_of(ptr, type, member)	\
-// ({	\
-// 	typeof(((type*)0)->member)* p = (ptr);	\
-// 	(type*)((u64)p - (u64)&(((type*)0)->member));	\
-// })
-
-#define container_of(ptr,type,member)							\
-({											\
-typeof(((type *)0)->member) * p = (ptr);					\
-(type *)((unsigned long)p - (unsigned long)&(((type *)0)->member));		\
+#define container_of(ptr, type, member)	\
+({	\
+	typeof(((type*)0)->member)* p = (ptr);	\
+	(type*)((u64)p - (u64)&(((type*)0)->member));	\
 })
+
+inline void wrmsr(u64 msr, u64 value)
+{
+	__asm__ __volatile__(
+		"	wrmsr	\n\t"
+		:
+		: "d"(value >> 32), "a"(value & 0xFFFFFFFF), "c"(msr)
+		: "memory"
+	);
+}
 
 #endif

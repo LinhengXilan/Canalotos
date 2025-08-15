@@ -1,11 +1,10 @@
 # @file: kernel/Makefile
 # @author: LinhengXilan
-# @data: 2025-7-29
-# @version: build11
+# @data: 2025-8-16
+# @version: build12
 
 OutputFile = $(TOutputFile)kernel/
 ObjectFile = $(TObjectFile)kernel/
-ImgFile = ../../Canalotos/img/
 
 obj = $(ObjectFile)head.o\
 	$(ObjectFile)main.o\
@@ -22,16 +21,16 @@ obj = $(ObjectFile)head.o\
 	$(ObjectFile)process/process.o \
 	$(ObjectFile)process/switch.o
 
-.PHONY: all clear
+.PHONY: all disasm clean
 
 all: mkdir build_sub build image
 
 mkdir:
 ifeq ($(wildcard $(ObjectFile)),)
-	mkdir $(ObjectFile)
+	mkdir -p $(ObjectFile)
 endif
 ifeq ($(wildcard $(OutputFile)),)
-	mkdir $(OutputFile)
+	mkdir -p $(OutputFile)
 endif
 
 build_sub:
@@ -47,10 +46,10 @@ image:
 	sync
 	umount /mnt/floppy
 
-clear:
-	cd lib && $(MAKE) clear
-	cd irq && $(MAKE) clear
-	cd process && $(MAKE) clear
+clean:
+	cd lib && $(MAKE) clean
+	cd irq && $(MAKE) clean
+	cd process && $(MAKE) clean
 	rm -rf $(OutputFile)
 	rm -rf $(ObjectFile)
 

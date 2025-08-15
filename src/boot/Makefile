@@ -1,7 +1,7 @@
 # @file: boot/Makefile
 # @author: LinhengXilan
-# @data: 2025-7-29
-# @version: build11
+# @data: 2025-8-16
+# @version: build12
 
 OutputFile = $(TOutputFile)boot/
 bin = $(OutputFile)boot.bin $(OutputFile)loader.bin
@@ -10,13 +10,13 @@ ASM = nasm
 
 ASMFLAGS = -w-zeroing
 
-.PHONY: all clear
+.PHONY: all clean
 
 all: mkdir build image
 
 mkdir:
 ifeq ($(wildcard $(OutputFile)),)
-	mkdir $(OutputFile)
+	mkdir -p $(OutputFile)
 endif
 
 build: $(bin)
@@ -28,7 +28,7 @@ image:
 	sync
 	umount /mnt/floppy
 
-clear:
+clean:
 	rm -rf $(OutputFile)
 
 $(OutputFile)%.bin: %.asm

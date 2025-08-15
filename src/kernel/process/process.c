@@ -1,9 +1,10 @@
 /**
  * @file: kernel/process/process.c
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-8-16
+ * @version: build12
  **/
+
 #include <kernel/global.h>
 #include <kernel/process/process.h>
 #include <kernel/tss.h>
@@ -17,16 +18,16 @@ void init_process_memory();
 u64 init_context(u64 (*func)(u64), u64 arg, u64 flags);
 u64 init(u64 arg);
 u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_size);
-void kernel_thread_func();
-void ret_system_call();
+void ret_to_kernel();
+void ret_to_user();
 
 /**
  * @brief 初始化进程
- * @note 地址：0x107433
  */
 void init_process()
 {
 	_color_printk(ORANGE, BLACK, "init_process()\n");
+	wrmsr(IA32_SYSENTER_CS, SELECTOR_KERNEL_CS);
 	struct Process_struct* process = nullptr;
 	init_process_memory();
 	list_init(&_init_process.process.list);
@@ -76,7 +77,7 @@ u64 init_context(u64 (*func)(u64), u64 arg, u64 flags)
 	context.cs = SELECTOR_KERNEL_CS;
 	context.ss = SELECTOR_KERNEL_DS;
 	context.rflags = 1 << 9;
-	context.rip = (u64)kernel_thread_func;
+	context.rip = (u64)ret_to_kernel;
 	return create_process(&context, flags, NULL, NULL);
 }
 
@@ -104,7 +105,7 @@ u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_s
 	thread->rsp = (u64)process + PROCESS_STACK_SIZE - sizeof(struct Context);
 	if (!(process->flags & KERNEL))
 	{
-		thread->rip = regs->rip = (u64)ret_system_call;
+		thread->rip = regs->rip = (u64)ret_to_user;
 	}
 	process->state = RUNNING;
 	return 0;
@@ -112,19 +113,26 @@ u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_s
 
 u64 init(u64 arg)
 {
-	_color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
-	return 1;
+  _color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
+  struct Context* context = nullptr;
+    current_process->thread->rip = (u64)ret_to_user;
+    current_process->thread->rsp = (u64)get_current_process() + PROCESS_STACK_SIZE - sizeof(struct Context);
+    context = (struct Context*)current_process->thread->rsp;
+    __asm__ __volatile__(
+    "	movq	%1, %%rsp	\n\t"
+    "	pushq	%2			\n\t"
+    "	jmp		do_exec		\n\t"
+    :
+    : "D"(context), "r"(current_process->thread->rsp), "r"(current_process->thread->rip)
+    : "memory"
+    );
+    return 1;
 }
 
 void do_process_exit(u64 code)
 {
 	_color_printk(BLUE, BLACK, "exit process is running, code = 0x%lx\n", code);
 	while(1);
-}
-
-void ret_system_call()
-{
-
 }
 
 void _switch_to(struct Process_struct* prev, struct Process_struct* next)
@@ -154,4 +162,24 @@ void _switch_to(struct Process_struct* prev, struct Process_struct* next)
 	);
 	_color_printk(GREEN, BLACK, "prev->thread->rsp0:%x\n", prev->thread->rsp0);
 	_color_printk(GREEN, BLACK, "next->thread->rsp0:%x\n", next->thread->rsp0);
+}
+
+void user_func()
+{
+	_color_printk(BLUE, BLACK, "user function is running\n");
+	while (1);
+}
+
+u64 do_exec(struct Context* context)
+{
+	context->rdx = (func_addr)user_func;
+	context->rcx = (func_addr)user_func + 0x200000;
+	context->rax = 1;
+	context->ds = 0;
+	context->es = 0;
+	_color_printk(BLUE, BLACK, "do_exec() is running\n");
+	// memcpy((void*)0x800000, user_func, 1024);
+	_printk("do_exec() finished\n");
+
+	return 0;
 }

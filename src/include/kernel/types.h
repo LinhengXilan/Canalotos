@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/types.h
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-8-16
+ * @version: build12
  **/
 
 #ifndef _KRENEL_TYPES_H_
@@ -21,6 +21,7 @@ typedef long long	s64;
 typedef unsigned long long size_t;
 typedef unsigned long long ptr_t;
 typedef unsigned long long pid_t;
+typedef unsigned long long func_addr;
 
 typedef void (*int_handler)();
 typedef void (*irq_handler)();

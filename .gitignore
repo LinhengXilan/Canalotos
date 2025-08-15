@@ -1,3 +1,15 @@
+# files
 CMakeLists.txt
 version.md
 *.xlsx
+disasm
+note
+*.bxrc
+
+# directories
+.vscode/
+.idea/
+bin/
+disasm/
+obj/
+cmake-build-debug-wsl/
