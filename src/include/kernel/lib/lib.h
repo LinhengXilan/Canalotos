@@ -1,8 +1,8 @@
 /**
  * @file: kernel/lib/lib.h
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-8-18
+ * @version: build13
  **/
 
 #ifndef _KERNEL_LIB_H_
@@ -28,6 +28,11 @@ void _disable_irq(int irq);
 	(type*)((u64)p - (u64)&(((type*)0)->member));	\
 })
 
+/**
+ * @param msr msr寄存器地址
+ * @param value 值
+ * @brief 向msr寄存器写入值
+ */
 inline void wrmsr(u64 msr, u64 value)
 {
 	__asm__ __volatile__(
@@ -37,5 +42,7 @@ inline void wrmsr(u64 msr, u64 value)
 		: "memory"
 	);
 }
+
+void system_call();
 
 #endif

@@ -1,7 +1,7 @@
 # @file: Makefile
 # @author: LinhengXilan
-# @data: 2025-8-16
-# @version: build12
+# @data: 2025-8-18
+# @version: build13
 
 RootDir = $(shell pwd)
 TOutputFile = $(RootDir)/../bin/
@@ -14,7 +14,7 @@ CC = gcc
 LD = ld
 
 ASMFLAGS = -f elf64 -w-zeroing
-CCFLAGS = -mcmodel=large -fno-builtin -m64 -c -I $(RootDir)/include -fno-stack-protector -std=c23 -O -march=core2 #-mno-sse -Wdiscarded-qualifiers
+CCFLAGS = -mcmodel=large -fno-builtin -m64 -c -I $(RootDir)/include -fno-stack-protector -std=c23 -O -march=core2 #-mno-sse #-Wdiscarded-qualifiers
 LDFLAGS = -b elf64-x86-64 -T kernel.lds -z muldefs #-s --no-warn-rwx-segments
 
 export MAKE ASM CC LD

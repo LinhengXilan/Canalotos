@@ -1,8 +1,8 @@
 /**
  * @file: kernel/process/process.c
  * @author: LinhengXilan
- * @data: 2025-8-16
- * @version: build12
+ * @data: 2025-8-18
+ * @version: build13
  **/
 
 #include <kernel/global.h>
@@ -13,6 +13,7 @@
 #include <kernel/lib/list.h>
 #include <kernel/lib/lib.h>
 #include <kernel/printk.h>
+#include <kernel/syscall.h>
 
 void init_process_memory();
 u64 init_context(u64 (*func)(u64), u64 arg, u64 flags);
@@ -28,13 +29,15 @@ void init_process()
 {
 	_color_printk(ORANGE, BLACK, "init_process()\n");
 	wrmsr(IA32_SYSENTER_CS, SELECTOR_KERNEL_CS);
+	wrmsr(IA32_SYSENTER_ESP, current_process->thread->rsp0);
+	wrmsr(IA32_SYSENTER_EIP, (u64)system_call);
 	struct Process_struct* process = nullptr;
 	init_process_memory();
 	list_init(&_init_process.process.list);
 	init_context(init, 10, NULL);
 	_init_process.process.state = RUNNING;
-	process = container_of(list_next(&get_current_process()->list), struct Process_struct, list);
-	switch_to(get_current_process(), process);
+	process = container_of(list_next(&current_process->list), struct Process_struct, list);
+	switch_to(current_process, process);
 }
 
 /**
@@ -87,7 +90,7 @@ u64 init_context(u64 (*func)(u64), u64 arg, u64 flags)
 u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_size)
 {
 	_color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
-	struct Page* page = alloc_page(ZONE_NORMAL,1,PAGE_TABLE_MAPPED | PAGE_ACTIVE | PAGE_KERNEL);
+	struct Page* page = alloc_page(ZONE_NORMAL, 1, PAGE_TABLE_MAPPED | PAGE_ACTIVE | PAGE_KERNEL);
 	_color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
 	struct Process_struct* process = (struct Process_struct*)phy2vir(page->address);
 	_color_printk(GREEN, BLACK, "process address:%lx\n", (u64)process);
@@ -113,18 +116,17 @@ u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_s
 
 u64 init(u64 arg)
 {
-  _color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
-  struct Context* context = nullptr;
+	_color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
     current_process->thread->rip = (u64)ret_to_user;
-    current_process->thread->rsp = (u64)get_current_process() + PROCESS_STACK_SIZE - sizeof(struct Context);
-    context = (struct Context*)current_process->thread->rsp;
+    current_process->thread->rsp = (u64)current_process + PROCESS_STACK_SIZE - sizeof(struct Context);
+	struct Context* context = (struct Context*)current_process->thread->rsp;
     __asm__ __volatile__(
-    "	movq	%1, %%rsp	\n\t"
-    "	pushq	%2			\n\t"
-    "	jmp		do_exec		\n\t"
-    :
-    : "D"(context), "r"(current_process->thread->rsp), "r"(current_process->thread->rip)
-    : "memory"
+		"	movq	%1, %%rsp	\n\t"
+		"	pushq	%2			\n\t"
+		"	jmp		do_exec		\n\t"
+		:
+		: "D"(context), "r"(current_process->thread->rsp), "r"(current_process->thread->rip)
+		: "memory"
     );
     return 1;
 }
@@ -166,7 +168,19 @@ void _switch_to(struct Process_struct* prev, struct Process_struct* next)
 
 void user_func()
 {
+	_printk("userfunc: %x\n", user_func);
+	u64 ret = 0;
 	_color_printk(BLUE, BLACK, "user function is running\n");
+	__asm__ __volatile(
+		"	leaq	sysexit_ret_addr(%%rip), %%rdx	\n\t"
+		"	movq	%%rsp, %%rcx					\n\t"
+		"	sysenter								\n\t"
+		"sysexit_ret_addr:							\n\t"
+		: "=a"(ret)
+		: "0"(8)
+		: "memory"
+	);
+	_color_printk(BLUE, BLACK, "user function called sysenter, ret: 0x%d\n", ret);
 	while (1);
 }
 
@@ -179,7 +193,10 @@ u64 do_exec(struct Context* context)
 	context->es = 0;
 	_color_printk(BLUE, BLACK, "do_exec() is running\n");
 	// memcpy((void*)0x800000, user_func, 1024);
-	_printk("do_exec() finished\n");
-
 	return 0;
+}
+
+u64 do_syscall(struct Context* context)
+{
+	return syscall_table[context->rax](context);
 }

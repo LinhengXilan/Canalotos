@@ -1,12 +1,12 @@
 /**
  * @file: include/kernel/types.h
  * @author: LinhengXilan
- * @data: 2025-8-16
- * @version: build12
+ * @data: 2025-8-18
+ * @version: build13
  **/
 
-#ifndef _KRENEL_TYPES_H_
-#define _KRENEL_TYPES_H_
+#ifndef _KERNEL_TYPES_H_
+#define _KERNEL_TYPES_H_
 
 typedef unsigned char 		u8;
 typedef unsigned short 		u16;

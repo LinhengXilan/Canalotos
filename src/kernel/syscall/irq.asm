@@ -1,4 +1,4 @@
-; @file: kernel/irq/irq.asm
+; @file: kernel/syscall/irq.asm
 ; @author: LinhengXilan
 ; @data: 2025-7-29
 ; @version: build11

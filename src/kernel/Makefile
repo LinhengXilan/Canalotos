@@ -1,7 +1,7 @@
 # @file: kernel/Makefile
 # @author: LinhengXilan
-# @data: 2025-8-16
-# @version: build12
+# @data: 2025-8-18
+# @version: build13
 
 OutputFile = $(TOutputFile)kernel/
 ObjectFile = $(TObjectFile)kernel/
@@ -16,8 +16,9 @@ obj = $(ObjectFile)head.o\
 	$(ObjectFile)keyboard.o\
 	$(ObjectFile)lib/lib.o\
 	$(ObjectFile)lib/string.o\
-	$(ObjectFile)irq/8259A.o \
-	$(ObjectFile)irq/irq.o\
+	$(ObjectFile)syscall/8259A.o \
+	$(ObjectFile)syscall/irq.o\
+	$(ObjectFile)syscall/syscall.o\
 	$(ObjectFile)process/process.o \
 	$(ObjectFile)process/switch.o
 
@@ -35,7 +36,7 @@ endif
 
 build_sub:
 	cd lib && $(MAKE)
-	cd irq && $(MAKE)
+	cd syscall && $(MAKE)
 	cd process && $(MAKE)
 
 build: $(OutputFile)kernel.bin
@@ -48,7 +49,7 @@ image:
 
 clean:
 	cd lib && $(MAKE) clean
-	cd irq && $(MAKE) clean
+	cd syscall && $(MAKE) clean
 	cd process && $(MAKE) clean
 	rm -rf $(OutputFile)
 	rm -rf $(ObjectFile)

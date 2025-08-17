@@ -1,5 +1,5 @@
 /**
- * @file: kernel/irq/8295A.c
+ * @file: kernel/syscall/8295A.c
  * @author: LinhengXilan
  * @data: 2025-7-29
  * @version: build11
