@@ -3,28 +3,28 @@
 # @data: 2025-8-18
 # @version: build13
 
-ObjectFile = $(TObjectFile)kernel/syscall/
+ObjectPath = $(TObjectPath)kernel/syscall/
 
-obj = $(ObjectFile)8259A.o\
-	$(ObjectFile)irq.o \
-	$(ObjectFile)syscall.o \
+obj = $(ObjectPath)8259A.o\
+	$(ObjectPath)irq.o \
+	$(ObjectPath)syscall.o \
 
 .PHONY: all clean
 
 all: mkdir build
 
 mkdir:
-ifeq ($(wildcard $(ObjectFile)),)
-	mkdir -p $(ObjectFile)
+ifeq ($(wildcard $(ObjectPath)),)
+	mkdir -p $(ObjectPath)
 endif
 
 build: $(obj)
 
 clean:
-	rm -rf $(ObjectFile)
+	rm -rf $(ObjectPath)
 
-$(ObjectFile)%.o: %.asm
+$(ObjectPath)%.o: %.asm
 	$(ASM) $< $(ASMFLAGS) -o $@
 
-$(ObjectFile)%.o: %.c
+$(ObjectPath)%.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@

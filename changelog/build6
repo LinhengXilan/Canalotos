@@ -1,0 +1,7 @@
+Changes in build6
+
+1. Unify code style in *.asm
+
+2. Setup default interrupt handler
+
+3. Setup Selector_TSS

@@ -2,14 +2,14 @@
 CMakeLists.txt
 version.md
 *.xlsx
-disasm
 note
 *.bxrc
+disasm
 
 # directories
 .vscode/
 .idea/
-bin/
 disasm/
+bin/
 obj/
 cmake-build-debug-wsl/

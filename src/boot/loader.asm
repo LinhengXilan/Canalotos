@@ -1,7 +1,7 @@
 ; @file: boot/loader.asm
 ; @author: LinhengXilan
-; @data: 2025-7-29
-; @version: build11
+; @data: 2025-9-14
+; @version: build14
 
 %include "macro.inc"
 
@@ -12,9 +12,11 @@
 
 BaseOfKernel equ 0
 OffsetOfKernel equ 0x100000
-BaseTmpOfKernel equ 0x00
-OffsetTmpOfKernel equ 0x7E00
+BaseTmpOfKernel equ 0x9000
+OffsetTmpOfKernel equ 0x0
 MemoryStructBuffer equ 0x7E00
+BaseOfBuffer    equ 0x0
+OffsetOfBuffer equ 0x8000
 
 [section .gdt]
 GDT32:              Descriptor32 0,          0,       0
@@ -23,8 +25,8 @@ GDT_Kernel_Data32:  Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_D
 GdtLen32 equ $ - GDT32
 GdtPtr32    dw GdtLen32 - 1
 			dd GDT32
-GDTSelector_Kernel_Code32 equ GDT_Kernel_Code32 - GDT32
-GDTSelector_Kernel_Data32 equ GDT_Kernel_Data32 - GDT32
+Selector_Kernel_Code32 equ GDT_Kernel_Code32 - GDT32
+Selector_Kernel_Data32 equ GDT_Kernel_Data32 - GDT32
 
 [section .gdt64]
 GDT:		        Descriptor 0
@@ -33,18 +35,18 @@ GDT_Kernel_Data:	Descriptor DA_DRW
 GdtLen equ $ - GDT
 GdtPtr  dw GdtLen - 1
 		dd GDT
-GDTSelector_Kernel_Code	equ	GDT_Kernel_Code - GDT
-GDTSelector_Kernel_Data	equ	GDT_Kernel_Data - GDT
+Selector_Kernel_Code	equ	GDT_Kernel_Code - GDT
+Selector_Kernel_Data	equ	GDT_Kernel_Data - GDT
 
 [section .s16]
 [bits 16]
 _Start:
-	mov	ax, cs
-	mov	ds, ax
-	mov	es, ax
-	mov	ax, 0
-	mov	ss, ax
-	mov	sp, 0x7C00
+	mov     ax, cs
+	mov     ds, ax
+	mov     es, ax
+	mov     ax, 0
+	mov     ss, ax
+	mov     sp, 0x7C00
 ; Open address A20.
 	push    ax
 	in      al, 0x92
@@ -56,35 +58,33 @@ _Start:
 	mov     eax, cr0
 	or      eax, 1
 	mov     cr0, eax
-	mov     ax, GDTSelector_Kernel_Data32
+	mov     ax, Selector_Kernel_Data32
 	mov     fs, ax
 	mov     eax, cr0
 	and     al, 0b11111110
 	mov     cr0, eax
 	sti
-; Reset floppy.
-	xor     ah, ah
-	xor     dl, dl
-	int     0x13
+
 ; Search kernel.bin.
-	mov     word [SectorNo], SectorNumOfRootDir
-_SearchInRootDir:
-	cmp     word [RootDirSize], 0
+	mov     word [sectorNo], sectorNumOfRootDir
+SearchInRootDir:
+	cmp     word [rootDirSize], 0
 	jz      .NoKernel
-	dec     word [RootDirSize]
-	mov     ax, 0
+	mov     ax, BaseOfBuffer
 	mov     es, ax
-	mov     bx, 0x8000
-	mov     ax, [SectorNo]
+	dec     word [rootDirSize]
+	mov     eax, [sectorNo]
 	mov     cl, 1
-	call    _ReadSector
-	mov     si, KernelFile
-	mov     di, 0x8000
+	mov     bx, BaseOfBuffer
+	mov     dx, OffsetOfBuffer
+	call    ReadDisk
+	mov     si, kernelFileName
+	mov     di, OffsetOfBuffer
 	cld
 	mov     dx, 0x10
-.SearchForKernel:
+.SearchKernel:
 	cmp     dx, 0
-	jz      .GotoNextSector
+	jz      .NextSector
 	dec     dx
 	mov     cx, 11
 .CmpFileName:
@@ -96,16 +96,16 @@ _SearchInRootDir:
 	jz      .GoOn
 	jmp     .Different
 .GoOn:
-	inc	di
-	jmp	.CmpFileName
+	inc     di
+	jmp     .CmpFileName
 .Different:
 	and     di, 0xFFE0
 	add     di, 0x20
-	mov     si, KernelFile
-	jmp     .SearchForKernel
-.GotoNextSector:
-	add     word [SectorNo], 1
-	jmp     _SearchInRootDir
+	mov     si, kernelFileName
+	jmp     .SearchKernel
+.NextSector:
+	add     word [sectorNo], 1
+	jmp     SearchInRootDir
 .NoKernel:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
@@ -118,69 +118,65 @@ _SearchInRootDir:
 	mov     bp, MSG_NoKernel
 	int     0x10
 	jmp     $
-.FileFound:
-	mov     ax, RootDirSectors
-	and     di, 0xFFE0
-	add     di, 0x1A
-	mov     cx, word [es:di]
-	push    cx
-	add     cx, ax
-	add     cx, SectorBalance
-	mov     eax, BaseTmpOfKernel
-	mov     es, eax
-	mov     bx, OffsetTmpOfKernel
-	mov     ax, cx
-.GoOnLoadingFile:
-	mov	    cl, 1
-	call    _ReadSector
-	pop     ax
-	push    cx
-	push    eax
-	push    fs
-	push    edi
-	push    ds
-	push    esi
-	mov     cx, 0x200
-	mov     ax, BaseOfKernel
-	mov     fs, ax
+.FileFound: ; 0x10128
+	and     di, 0xFFE0  ; 定位到此目录项起始地址
+	add     di, 0x1A    ; 文件起始簇号
+	mov     ax, word[es:di]
+	mov     word [clusterNo], ax
+	mov     eax, sectorNumOfFAT1
+    mov     bx, BaseOfBuffer
+    mov     dx, OffsetOfBuffer
+    mov     cx, word [BPB_FATSz16]
+    call    ReadDisk
+.LoadFile:
+	mov     ax, word [clusterNo]
+	sub     ax, 2
+	mov     bl, 4
+	mul     bl
+	add     ax, 57
+	mov     cx, 4
+	mov     bx, BaseTmpOfKernel
+	mov     dx, OffsetTmpOfKernel
+	call    ReadDisk
+	push	cx
+	push	eax
+	push	edi
+	push	ds
+	push	esi
+	mov     cx,	0x800
 	mov     edi, dword [OffsetOfKernelCount]
-	mov     ax, BaseTmpOfKernel
-	mov     ds, ax
+	mov     ax,	BaseTmpOfKernel
+	mov     ds,	ax
 	mov     esi, OffsetTmpOfKernel
-_MoveKernel:
-	mov     al, byte [ds:esi]
+MoveKernel:
+	mov     al,	byte [ds:esi]
 	mov     byte [fs:edi], al
 	inc     esi
 	inc     edi
-	loop	_MoveKernel
-	mov     eax, 0x1000
-	mov     ds, eax
+	loop    MoveKernel
+	mov     ax, 0x1000     ; 0x10189
+	mov     ds,	ax
 	mov     dword [OffsetOfKernelCount], edi
 	pop     esi
 	pop     ds
 	pop     edi
-	pop     fs
 	pop     eax
 	pop     cx
-	call	_GetFATEntry
-	cmp     ax, 0xFFF
+
+
+	mov     ax, word [clusterNo]
+    call    GetNextFAT  ; 0x101a1
+	cmp     ax,	0FFFh
 	jz      .FileLoaded
-	push    ax
-	mov     dx, RootDirSectors
-	add     ax, dx
-	add     ax, SectorBalance
-	jmp	    _SearchInRootDir.GoOnLoadingFile
+	jmp     SearchInRootDir.LoadFile ; 有问题
 .FileLoaded:
 	mov     ax, 0xB800
 	mov     gs, ax
-
-_KillMotor:
 	push    dx
 	mov     dx, 0x3F2
 	mov     al, 0
 	out     dx, al
 	pop     dx
-
 	mov     ebx, 0
 	mov     ax, 0
 	mov     es, ax
@@ -273,11 +269,11 @@ _GetSVGAMode:
 	mov     eax, cr0
 	or      eax, 1
 	mov     cr0, eax
-	jmp     dword GDTSelector_Kernel_Code32:_GoToTempProtect
+	jmp     dword Selector_Kernel_Code32:GoToTempProtect
 
 [SECTION .s32]
 [BITS 32]
-_GoToTempProtect:
+GoToTempProtect:
 ; Enter temp long mode.
 	mov     ax, 0x10
 	mov     ds, ax
@@ -333,69 +329,47 @@ _GoToTempProtect:
 	bts     eax, 0
 	bts     eax, 31
 	mov     cr0, eax
-	jmp     GDTSelector_Kernel_Code:OffsetOfKernel  ;0x1036b
+	jmp     Selector_Kernel_Code:OffsetOfKernel  ;0x1036b
 
 [section .lib16]
 [bits 16]
-_ReadSector:
-	push    bp
-	mov     bp, sp
-	sub     esp, 2
-	mov     byte [bp - 2], cl
-	push    bx
-	mov     bl, [BPB_SecPerTrk]
-	div     bl
-	inc     ah
-	mov     cl, ah
-	mov     dh, al
-	shr     al, 1
-	mov     ch, al
-	and     dh, 1
-	pop     bx
-	mov     dl, [BS_DrvNum]
-.GoOnReading:
-	mov     ah, 2
-	mov     al, byte [bp - 2]
+; void ReadDisk(eax lba, cx nr_sectors, bx buffer_base, dx buffer_offset);
+; Read disk.
+ReadDisk:
+	mov     dword [disk_lba], eax
+	mov     word [disk_nr_sectors], cx
+	mov     word [disk_buffer_base], bx      ; base of buffer
+	mov     word [disk_buffer_offset], dx      ; base of buffer
+	mov     si, disk_pack
+	mov     ah, 0x42    ; function number: read disk
+	mov     dl, 0x80    ; disk drive number
 	int     0x13
-	jc      .GoOnReading
-	add     esp, 2
-	pop     bp
 	ret
 
-_GetFATEntry:
-	push    es
-	push    bx
-	push    ax
-	mov     ax, 0
-	mov     es, ax
-	pop     ax
-	mov     byte [Odd], 0
-	mov     bx, 3
-	mul     bx
+GetNextFAT:
+	xor     dx, dx
 	mov     bx, 2
 	div     bx
-	cmp     dx, 0
-	jz      .Even
-	mov     byte [Odd], 1
-.Even:
-	xor     dx, dx
-	mov     bx, [BPB_BytesPerSec]
-	div     bx
-	push    dx
-	mov     bx, 0x8000
-	add     ax, SectorNumOfFAT1
-	mov     cl, 2
-	call    _ReadSector
-	pop     dx
-	add     bx, dx
-	mov     ax, [es:bx]
-	cmp     byte [Odd], 1
-	jnz     .Even2
+	mov     word [odd], dx
+	mov     bl, 3
+	mul     bl
+	mov     si, OffsetOfBuffer
+	add     si, ax
+	cmp     byte [odd], 1
+	push    ds
+	mov     ax, BaseOfBuffer
+	mov     ds, ax
+	jz      .1
+	lodsw
+	jmp     .2
+.1:
+	add     si, 1
+	lodsw
 	shr     ax, 4
-.Even2:
+.2:
+	pop     ds
 	and     ax, 0xFFF
-	pop     bx
-	pop     es
+	mov     word [clusterNo], ax
 	ret
 
 [section .lib32]
@@ -416,15 +390,31 @@ _Support_long_mode:
 no_support:
 	jmp     $
 
-RootDirSize	dw RootDirSectors
-SectorNo dw 0
-Odd db 0
+rootDirSize	dw rootDirSectors
+sectorNo dw 0
+odd db 0
 OffsetOfKernelCount dd OffsetOfKernel
 MemStructNumber dd 0
 SVGAModeCounter dd 0
+clusterNo dw 0
+
+disk_pack:
+	db      0x10
+	db      0
+disk_nr_sectors:
+	dw      0
+disk_buffer_offset:
+	dw      0
+disk_buffer_base:
+	dw      0
+disk_lba:
+	dd      0
+	dd      0
 
 MSG_NoKernel: db "ERROR:No KERNEL Found"
-KernelFile: db "KERNEL  BIN", 0
+kernelFileName: db "KERNEL  BIN", 0
 MSG_GetMemStructError: db "Get Memory Struct ERROR"
 MSG_GetSVGAInfoError: db "Get SVGA VBE Info ERROR"
 MSG_GetSVGAModeError: db "Get SVGA Mode Info ERROR"
+
+MSG_NoLoader: db "123"

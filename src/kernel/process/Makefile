@@ -3,27 +3,27 @@
 # @data: 2025-8-16
 # @version: build12
 
-ObjectFile = $(TObjectFile)kernel/process/
+ObjectPath = $(TObjectPath)kernel/process/
 
-obj = $(ObjectFile)process.o\
-	$(ObjectFile)switch.o
+obj = $(ObjectPath)process.o\
+	$(ObjectPath)switch.o
 
 .PHONY: all clean
 
 all: mkdir build
 
 mkdir:
-ifeq ($(wildcard $(ObjectFile)),)
-	mkdir -p $(ObjectFile)
+ifeq ($(wildcard $(ObjectPath)),)
+	mkdir -p $(ObjectPath)
 endif
 
 build: $(obj)
 
 clean:
-	rm -rf $(ObjectFile)
+	rm -rf $(ObjectPath)
 
-$(ObjectFile)%.o: %.asm
+$(ObjectPath)%.o: %.asm
 	$(ASM) $< $(ASMFLAGS) -o $@
 
-$(ObjectFile)%.o: %.c
+$(ObjectPath)%.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@

@@ -1,12 +1,13 @@
 # @file: Makefile
 # @author: LinhengXilan
-# @data: 2025-8-18
-# @version: build13
+# @data: 2025-9-14
+# @version: build14
 
 RootDir = $(shell pwd)
-TOutputFile = $(RootDir)/../bin/
-TObjectFile = $(RootDir)/../obj/
-ImgFile = $(RootDir)/../img/
+TOutputPath = $(RootDir)/../bin/
+TObjectPath = $(RootDir)/../obj/
+ImgPath = $(RootDir)/../img/
+UsbStorage = /dev/sdg1	# u盘分区的路径
 
 MAKE = make
 ASM = nasm
@@ -19,35 +20,43 @@ LDFLAGS = -b elf64-x86-64 -T kernel.lds -z muldefs #-s --no-warn-rwx-segments
 
 export MAKE ASM CC LD
 export ASMFLAGS CCFLAGS LDFLAGS
-export ImgFile TOutputFile TObjectFile
+export TOutputPath TObjectPath ImgPath UsbStorage
 
-.PHONY: all clean bochs disasm
+.PHONY: all clean bochs disasm img
 
 all: mkdir build
 
+img: mkdir mkdir_img build_img
+
 mkdir:
-ifeq ($(wildcard $(TOutputFile)),)
-	mkdir -p $(TOutputFile)
+ifeq ($(wildcard $(TOutputPath)),)
+	mkdir -p $(TOutputPath)
 endif
-ifeq ($(wildcard $(TObjectFile)),)
-	mkdir -p $(TObjectFile)
+ifeq ($(wildcard $(TObjectPath)),)
+	mkdir -p $(TObjectPath)
 endif
-ifeq ($(wildcard $(ImgFile)),)
-	mkdir -p $(ImgFile)
+	dd if=/dev/zero of=$(UsbStorage) bs=512 count=100
+
+mkdir_img:
+ifeq ($(wildcard $(ImgPath)),)
+	mkdir -p $(ImgPath)
 endif
-	dd if=/dev/zero of=$(ImgFile)boot.img bs=512 count=2880
+	dd if=/dev/zero of=$(ImgPath)a.img bs=512 count=2880
 
 build:
 	cd boot && $(MAKE)
 	cd kernel && $(MAKE)
 
+build_img:
+	cd boot && $(MAKE) img
+	cd kernel && $(MAKE) img
+
 clean:
 	cd boot && $(MAKE) clean
 	cd kernel && $(MAKE) clean
-	rm -rf $(TObjectFile)
-	rm -rf $(TOutputFile)
-	rm -rf $(TDisasmFile)
-	rm -rf $(ImgFile)
+	rm -rf $(TObjectPath)
+	rm -rf $(TOutputPath)
+	rm -rf $(TImgPath)
 
 bochs:
 	bochs -debugger -f $(RootDir)/../bochsrc

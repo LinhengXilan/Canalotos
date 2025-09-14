@@ -1,0 +1,9 @@
+Changes in build7
+
+1. Added fault handler entry in file "kernel/fault.asm".
+
+2. Added and set fault handler in file "kernel/traps.c"
+
+3. Fixed the issue that function `__itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags)` in file "kernel/printk.c" cannot handle 64-bit data correctly.
+
+4. Moved screen initialization code to function `void init_screen()` in file "kernel/printk.c"

@@ -106,6 +106,8 @@ u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_s
 	thread->rsp0 = (u64)process + PROCESS_STACK_SIZE;
 	thread->rip = regs->rip;
 	thread->rsp = (u64)process + PROCESS_STACK_SIZE - sizeof(struct Context);
+	thread->fs = SELECTOR_KERNEL_DS;
+	thread->gs = SELECTOR_KERNEL_DS;
 	if (!(process->flags & KERNEL))
 	{
 		thread->rip = regs->rip = (u64)ret_to_user;
@@ -180,7 +182,7 @@ void user_func()
 		: "0"(8)
 		: "memory"
 	);
-	_color_printk(BLUE, BLACK, "user function called sysenter, ret: 0x%d\n", ret);
+	_color_printk(BLUE, BLACK, "user function called sysenter, ret: %d\n", ret);
 	while (1);
 }
 

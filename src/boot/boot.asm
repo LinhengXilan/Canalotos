@@ -1,53 +1,48 @@
 ; @file: boot/boot.asm
 ; @author: LinhengXilan
-; @data: 2025-7-29
-; @version: build11
+; @data: 2025-9-14
+; @version: build14
 
-BaseOfStack         equ	0x7C00
-BaseOfLoader        equ 0x1000
-OffsetOfLoader      equ 0
+STACK_BASE      equ 0x7C00
+TEMP_BUFFER_OFFSET   equ 0x8000
+LOADER_BASE     equ 0x1000
+LOADER_OFFSET   equ 0
 
 	org     0x7C00
-	jmp     short _Start
+	jmp     short Start
 	nop
 %include "FAT12.inc"
 
-_Start:
+Start:
 	mov	    ax,	cs
 	mov	    ds,	ax
 	mov	    es,	ax
 	mov	    ss,	ax
-	mov	    sp,	BaseOfStack
+	mov	    sp,	STACK_BASE
 ; Clear screen.
-	mov     ah,	0x6     ; int 0x10 function: clear screen
+	mov     ah,	0x6     ; int 0x10 function 0x6: clear screen
 	mov     bx,	0x700
 	mov     cx,	0
 	mov     dx,	0x184F
 	int     0x10
 ; Set cursor.
-	mov     ah,	0x2     ; int 0x10 function: set cursor
+	mov     ah,	0x2     ; int 0x10 function 0x2: set cursor
 	mov     bx, 0
 	mov     dx, 0
 	int     0x10
-; Reset floppy.
-	xor     ah,	ah
-	xor     dl,	dl
-	int     0x13
-
 ; Search for loader.
-	mov     word [sectorNo], SectorNumOfRootDir
-_SearchFile:
+	mov     word [sectorNo], sectorNumOfRootDir
+SearchFile:
 	cmp     word [rootDirSize], 0
 	jz      .FileNotFound
 	dec     word [rootDirSize]
-	mov     ax, 0
-	mov     es, ax
-	mov     bx, 0x8000
-	mov     ax, [sectorNo]
-	mov     cl, 1
-	call    _ReadSector
-	mov     si, LoaderFileName
-	mov     di, 0x8000
+	mov     eax, [sectorNo]
+	mov     cx, 1
+	mov     bx, 0
+	mov     dx, TEMP_BUFFER_OFFSET
+	call    ReadDisk
+	mov     si, loaderFileName
+	mov     di, TEMP_BUFFER_OFFSET
 	cld
 	mov     dx, 0x10
 .SearchLoader:
@@ -69,124 +64,109 @@ _SearchFile:
 .Different:
 	and     di, 0xFFE0
 	add     di, 0x20
-	mov     si, LoaderFileName
+	mov     si, loaderFileName
 	jmp     .SearchLoader
 .NextSector:
 	add     word [sectorNo], 1
-	jmp     _SearchFile
+	jmp     SearchFile
 .FileNotFound:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
 	mov     dx, 0x100
-	mov     cx, 23
+	mov     cx, 27
 	push    ax
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, MSG_NoLoader
+	mov     bp, msg_NoLoader
 	int     0x10
 	jmp     $
 .FileFound:
-	mov     ax, RootDirSectors
-	and     di, 0xFFE0
-	add     di, 0x1A
-	mov     cx, word [es:di]
-	push    cx
-	add     cx, ax
-	add     cx, SectorBalance
-	mov     ax, BaseOfLoader
-	mov     es, ax
-	mov     bx, OffsetOfLoader
-	mov     ax, cx
-; Get the FATs of loader.bin and call ReadSector to load it to memory until FAT=0xFFF.
+	and     di, 0xFFE0  ; 定位到此目录项起始地址
+	add     di, 0x1A    ; 文件起始簇号
+	mov     ax, word[es:di]
+	mov     word [clusterNo], ax
+	mov     eax, sectorNumOfFAT1
+    mov     bx, 0
+    mov     dx, TEMP_BUFFER_OFFSET
+    mov     cx, word [BPB_FATSz16]
+    call    ReadDisk
 .LoadFile:
-	mov     cl, 1
-	call    _ReadSector
-	pop     ax
-	call    _GetFATEntry
+	mov     ax, word [clusterNo]
+	sub     ax, 2
+	mov     bl, 4
+	mul     bl
+	add     ax, 57
+	mov     cx, 4
+	mov     bx, LOADER_BASE
+	mov     dx, LOADER_OFFSET
+	call    ReadDisk
+	mov     ax, word [clusterNo]
+	call    GetNextFAT
 	cmp     ax, 0xFFF
-	jz      .FileLoaded
-	push    ax
-	mov     dx, RootDirSectors
-	add     ax, dx
-	add     ax, SectorBalance
-	add     bx, [BPB_BytesPerSec]
-	jmp     .LoadFile
+	jnz     .LoadFile
 .FileLoaded:
-	jmp     BaseOfLoader:OffsetOfLoader
+	jmp     LOADER_BASE:LOADER_OFFSET
 
-; void _ReadSector(ax=sectorToRead, cl=numOfSectors, es:bx=buffer);
-; Read sector.
-_ReadSector:
-	push    bp
-	mov     bp, sp
-	sub     esp, 2
-	mov     byte [bp - 2], cl
-	push    bx
-	mov     bl, [BPB_SecPerTrk]
-	div     bl
-	inc     ah
-	mov     cl, ah
-	mov     dh, al
-	shr     al, 1
-	mov     ch, al
-	and     dh, 1
-	pop     bx
-	mov     dl, [BS_DrvNum]
-.Reading:
-	mov     ah, 2
-	mov     al, byte [bp - 2]
+; void ReadDisk(eax lba, cx nr_sectors, bx buffer_base, dx TEMP_BUFFER_OFFSET);
+; Read disk.
+ReadDisk:
+	mov     dword [diskLba], eax
+	mov     word [diskNrSectors], cx
+	mov     word [diskBufferBase], bx      ; base of buffer
+	mov     word [diskBufferOffset], dx      ; base of buffer
+	mov     si, diskPack
+	mov     ah, 0x42    ; function number: read disk
+	mov     dl, 0x80    ; disk drive number
 	int     0x13
-	jc      .Reading
-	add     esp, 2
-	pop     bp
 	ret
 
-; bool _GetFATEntry(ah=numOfFAT) -> [odd];
-; Get FAt Entry.
-_GetFATEntry:
-	push    es
-	push    bx
-	push    ax
-	mov     ax, 0
-	mov     es, ax
-	pop     ax
-	mov     byte [odd], 0
-	mov     bx, 3
-	mul     bx
+; ax GetFATEntry(ax cluster);
+; Get Next.
+GetNextFAT:
+	xor     dx, dx
 	mov     bx, 2
 	div     bx
-	cmp     dx, 0
-	jz      .Even
-	mov     byte [odd], 1
-.Even:
-	xor     dx, dx
-	mov     bx, [BPB_BytesPerSec]
-	div     bx
-	push    dx
-	mov     bx, 0x8000
-	add     ax, SectorNumOfFAT1
-	mov     cl, 2
-	call    _ReadSector
-	pop     dx
-	add     bx, dx
-	mov     ax, [es:bx]
+	mov     word [odd], dx
+	mov     bl, 3
+	mul     bl
+	mov     si, TEMP_BUFFER_OFFSET
+	add     si, ax
 	cmp     byte [odd], 1
-	jnz     .Even_2
+	jz      .1
+	lodsw
+	jmp     .2
+.1:
+	add     si, 1
+	lodsw
 	shr     ax, 4
-.Even_2:
+.2:
 	and     ax, 0xFFF
-	pop     bx
-	pop     es
+	mov     word [clusterNo], ax
 	ret
 
-rootDirSize dw RootDirSectors
+rootDirSize dw rootDirSectors
 sectorNo    dw 0
+clusterNo   dw 0
 odd db 0
-LoaderFileName:
+
+loaderFileName:
 	db "LOADER  BIN", 0
-MSG_NoLoader:
-	db "Missing file loader.bin"
+msg_NoLoader:
+	db "cannot find file loader.bin"
+
+diskPack:
+	db      0x10
+	db      0
+diskNrSectors:
+	dw      0x1
+diskBufferOffset:
+	dw      0x8000
+diskBufferBase:
+	dw      0
+diskLba:
+	dd      0
+	dd      0
 
 	resb    510 - ($ - $$)
-	dw      0xaa55
+	dw      0xAA55

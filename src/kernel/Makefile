@@ -1,37 +1,39 @@
 # @file: kernel/Makefile
 # @author: LinhengXilan
-# @data: 2025-8-18
-# @version: build13
+# @data: 2025-9-14
+# @version: build14
 
-OutputFile = $(TOutputFile)kernel/
-ObjectFile = $(TObjectFile)kernel/
+OutputPath = $(TOutputPath)kernel/
+ObjectPath = $(TObjectPath)kernel/
 
-obj = $(ObjectFile)head.o\
-	$(ObjectFile)main.o\
-	$(ObjectFile)global.o\
-	$(ObjectFile)printk.o\
-	$(ObjectFile)memory.o\
-	$(ObjectFile)entry.o\
-	$(ObjectFile)interrupt.o\
-	$(ObjectFile)keyboard.o\
-	$(ObjectFile)lib/lib.o\
-	$(ObjectFile)lib/string.o\
-	$(ObjectFile)syscall/8259A.o \
-	$(ObjectFile)syscall/irq.o\
-	$(ObjectFile)syscall/syscall.o\
-	$(ObjectFile)process/process.o \
-	$(ObjectFile)process/switch.o
+obj = $(ObjectPath)head.o\
+	$(ObjectPath)main.o\
+	$(ObjectPath)global.o\
+	$(ObjectPath)printk.o\
+	$(ObjectPath)memory.o\
+	$(ObjectPath)entry.o\
+	$(ObjectPath)interrupt.o\
+	$(ObjectPath)keyboard.o\
+	$(ObjectPath)lib/lib.o\
+	$(ObjectPath)lib/string.o\
+	$(ObjectPath)syscall/8259A.o \
+	$(ObjectPath)syscall/irq.o\
+	$(ObjectPath)syscall/syscall.o\
+	$(ObjectPath)process/process.o \
+	$(ObjectPath)process/switch.o
 
-.PHONY: all disasm clean
+.PHONY: all disasm clean img
 
 all: mkdir build_sub build image
 
+img: mkdir build_sub build floppy
+
 mkdir:
-ifeq ($(wildcard $(ObjectFile)),)
-	mkdir -p $(ObjectFile)
+ifeq ($(wildcard $(ObjectPath)),)
+	mkdir -p $(ObjectPath)
 endif
-ifeq ($(wildcard $(OutputFile)),)
-	mkdir -p $(OutputFile)
+ifeq ($(wildcard $(OutputPath)),)
+	mkdir -p $(OutputPath)
 endif
 
 build_sub:
@@ -39,11 +41,17 @@ build_sub:
 	cd syscall && $(MAKE)
 	cd process && $(MAKE)
 
-build: $(OutputFile)kernel.bin
+build: $(OutputPath)kernel.bin
 
 image:
-	mount $(ImgFile)boot.img /mnt/floppy -o loop
-	cp -fv $(OutputFile)kernel.bin /mnt/floppy/
+	mount $(UsbStorage) /mnt/floppy
+	cp -fv $(OutputPath)kernel.bin /mnt/floppy/
+	sync
+	umount /mnt/floppy
+
+floppy:
+	mount $(ImgPath)a.img /mnt/floppy
+	cp -fv $(OutputPath)kernel.bin /mnt/floppy/
 	sync
 	umount /mnt/floppy
 
@@ -51,15 +59,15 @@ clean:
 	cd lib && $(MAKE) clean
 	cd syscall && $(MAKE) clean
 	cd process && $(MAKE) clean
-	rm -rf $(OutputFile)
-	rm -rf $(ObjectFile)
+	rm -rf $(OutputPath)
+	rm -rf $(ObjectPath)
 
-$(ObjectFile)%.o: %.asm
+$(ObjectPath)%.o: %.asm
 	$(ASM) $< $(ASMFLAGS) -o $@
 
-$(ObjectFile)%.o: %.c
+$(ObjectPath)%.o: %.c
 	$(CC) $< $(CCFLAGS) -o $@
 
-$(OutputFile)kernel.bin : $(obj)
-	$(LD) $(obj) $(LDFLAGS) -o $(ObjectFile)system
-	objcopy $(ObjectFile)system -I elf64-x86-64 -S -R ".eh_frame" -R ".comment" -O binary $(OutputFile)kernel.bin
+$(OutputPath)kernel.bin : $(obj)
+	$(LD) $(obj) $(LDFLAGS) -o $(ObjectPath)system
+	objcopy $(ObjectPath)system -I elf64-x86-64 -S -R ".eh_frame" -R ".comment" -O binary $(OutputPath)kernel.bin

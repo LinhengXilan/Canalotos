@@ -1,0 +1,10 @@
+Changes in build8
+2025-5-1
+
+1. Add a simple memory manager and only hava memory initialization and page allocator
+
+2. Fix bugs in "int __printk(const char* format, ...)" and "PRIVATE char* __itoa(const char* buffer, u64 number, int base, u8 precision, u8 flags)"
+
+3. Rewrite void "memset(void* p_dst, char ch, size_t size)"
+
+4. "set_tss" and "load_tr"

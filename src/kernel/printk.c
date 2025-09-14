@@ -5,7 +5,6 @@
  * @version: build13
  **/
 
-
 #include <kernel/types.h>
 #include <kernel/const.h>
 #include <kernel/global.h>
