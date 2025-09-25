@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/const.h
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #ifndef _KERNEL_CONST_H_
@@ -15,6 +15,8 @@
 #define TRUE 1
 #define FALSE 0
 #define NULL 0
+
+#define LINEAR_MEMORY_BASE	0xFFFF800000000000
 
 // color
 #define BLACK	0x00000000

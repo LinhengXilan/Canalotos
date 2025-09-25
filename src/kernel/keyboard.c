@@ -32,7 +32,7 @@ PRIVATE u8 column;
 
 void init_keyboard()
 {
-	_color_printk(ORANGE, BLACK, "init_keyboard()\n");
+	 color_printk(ORANGE, BLACK, "init_keyboard()\n");
 	_put_irq_handler(IRQ_KEYBOARD, keyboard_handler);
 	_enable_irq(IRQ_KEYBOARD);
 

@@ -1,8 +1,8 @@
 /**
  * @file: kernel/memory.c
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #include <kernel/memory.h>
@@ -20,8 +20,8 @@ struct Page* alloc_page(u64 zone_type, u64 number, u64 flags);
  */
 void init_memory()
 {
-	_color_printk(ORANGE, BLACK, "init_memory()\n");
-	_color_printk(GREEN, BLACK, "memory type: 1.RAM\t2.ROM/Reserved\t3.ACPI Reclaim Memory\t4.ACPI NVS Memory/Undefined\n");
+	 color_printk(ORANGE, BLACK, "init_memory()\n");
+	 color_printk(GREEN, BLACK, "memory type: 1.RAM\t2.ROM/Reserved\t3.ACPI Reclaim Memory\t4.ACPI NVS Memory/Undefined\n");
 	// Set kernel length.
 	memory_desc.kernel_code_start = (u64)&_text;
 	memory_desc.kernel_code_end = (u64)&_etext;
@@ -36,7 +36,7 @@ void init_memory()
 		{
 			total_memory += memory->length;
 		}
-		_color_printk(GREEN, BLACK, "Address:%16lx\tLength:%16lx\tType:%x\n", memory->address, memory->length, memory->type);
+		color_printk(GREEN, BLACK, "Address:%16lx\tLength:%16lx\tType:%x\n", memory->address, memory->length, memory->type);
 		memory_desc.memory_table[i].address = memory->address;
 		memory_desc.memory_table[i].length = memory->length;
 		memory_desc.memory_table[i].type = memory->type;
@@ -47,7 +47,7 @@ void init_memory()
 			break;
 		}
 	}
-	_color_printk(GREEN, BLACK, "Total memory size:%16lx\n", total_memory);
+	color_printk(GREEN, BLACK, "Total memory size:%16lx\n", total_memory);
 	total_memory = 0;
 	for(int i = 0; i <= memory_desc.memory_table_size; i++)
 	{
@@ -65,9 +65,9 @@ void init_memory()
 		total_memory += (end - start) >> PAGE_2M_SHIFT;
 	}
 	// Get total memory.
-	_color_printk(GREEN, BLACK, "Number of 2M pages:%8x\n", total_memory);
+	color_printk(GREEN, BLACK, "Number of 2M pages:%8x\n", total_memory);
 	total_memory = memory_desc.memory_table[memory_desc.memory_table_size].address + memory_desc.memory_table[memory_desc.memory_table_size].length;
-	_color_printk(GREEN, BLACK, "Total memory size:%16lx\n", total_memory);
+	color_printk(GREEN, BLACK, "Total memory size:%16lx\n", total_memory);
 	// init bits map.
 	memory_desc.bits_map = (u64*)(memory_desc.kernel_end + PAGE_4K - 1 & PAGE_4K_MASK);
 	memory_desc.bits_map_size = total_memory >> PAGE_2M_SHIFT;
@@ -129,32 +129,32 @@ void init_memory()
 	memory_desc.pages->age = 0;
 	memory_desc.zones_length = memory_desc.zones_size * sizeof(struct Zone) + sizeof(u64) - 1 & ~(sizeof(u64) - 1);
 
-	_color_printk(GREEN, BLACK, "bits_map:%16lx, bits_size:%16lx, bits_length:%16lx\n", memory_desc.bits_map, memory_desc.bits_map_size, memory_desc.bits_map_length);
-	_color_printk(GREEN, BLACK, "pages_struct:%16lx,pages_size:%16lx,pages_length:%16lx\n", memory_desc.pages, memory_desc.pages_size, memory_desc.pages_length);
-	_color_printk(GREEN, BLACK, "zones_struct:%16lx,zones_size:%16lx,zones_length:%16lx\n", memory_desc.zones, memory_desc.zones_size, memory_desc.zones_length);
+	color_printk(GREEN, BLACK, "bits_map:%16lx, bits_size:%16lx, bits_length:%16lx\n", memory_desc.bits_map, memory_desc.bits_map_size, memory_desc.bits_map_length);
+	color_printk(GREEN, BLACK, "pages_struct:%16lx,pages_size:%16lx,pages_length:%16lx\n", memory_desc.pages, memory_desc.pages_size, memory_desc.pages_length);
+	color_printk(GREEN, BLACK, "zones_struct:%16lx,zones_size:%16lx,zones_length:%16lx\n", memory_desc.zones, memory_desc.zones_size, memory_desc.zones_length);
 
 	ZONE_DMA_INDEX = 0;
 	ZONE_NORMAL_INDEX = 0;
 	for (int i = 0; i < memory_desc.zones_size; i++)
 	{
 		struct Zone* zone = memory_desc.zones + i;
-		_color_printk(GREEN,BLACK,"zone_start_address:%16lx, zone_end_address:%16lx, zone_length:%16lx, pages_group:%16lx, pages_length:%16lx\n", zone->start_address, zone->end_address, zone->capacity, zone->pages, zone->page_size);
+		color_printk(GREEN,BLACK,"zone_start_address:%16lx, zone_end_address:%16lx, zone_length:%16lx, pages_group:%16lx, pages_length:%16lx\n", zone->start_address, zone->end_address, zone->capacity, zone->pages, zone->page_size);
 		if (zone->start_address == 0x100000000)
 		{
 			ZONE_UNMAPPED_INDEX = i;
 		}
 	}
 	memory_desc.end_of_mem_desc = (u64)memory_desc.zones + memory_desc.zones_length + sizeof(u64) * 32 & ~(sizeof(u64) - 1);
-	_color_printk(GREEN, BLACK, "start_code:%16lx, end_code:%16lx, end_data:%16lx, end_brk:%16lx, end_of_struct:%16lx\n", memory_desc.kernel_code_start, memory_desc.kernel_code_end, memory_desc.kernel_data_end, memory_desc.kernel_end, memory_desc.end_of_mem_desc);
+	color_printk(GREEN, BLACK, "start_code:%16lx, end_code:%16lx, end_data:%16lx, end_brk:%16lx, end_of_struct:%16lx\n", memory_desc.kernel_code_start, memory_desc.kernel_code_end, memory_desc.kernel_data_end, memory_desc.kernel_end, memory_desc.end_of_mem_desc);
 	int size = vir2phy(memory_desc.end_of_mem_desc) >> PAGE_2M_SHIFT;
 	for (int i = 0; i <= size; i++)
 	{
 		page_init(memory_desc.pages + i, PAGE_TABLE_MAPPED | PAGE_KERNEL_INIT | PAGE_ACTIVE | PAGE_KERNEL);
 	}
 	Global_CR3 = get_gdt();
-	_color_printk(GREEN, BLACK, "Global_CR3\t:%16lx\n", Global_CR3);
-	_color_printk(GREEN, BLACK, "*Global_CR3\t:%16lx\n", *phy2vir(Global_CR3) & ~0xff);
-	_color_printk(GREEN, BLACK, "**Global_CR3\t:%16lx\n", *phy2vir(*phy2vir(Global_CR3) & ~0xff) & ~0xff);
+	color_printk(GREEN, BLACK, "Global_CR3\t:%16lx\n", Global_CR3);
+	color_printk(GREEN, BLACK, "*Global_CR3\t:%16lx\n", *phy2vir(Global_CR3) & ~0xff);
+	color_printk(GREEN, BLACK, "**Global_CR3\t:%16lx\n", *phy2vir(*phy2vir(Global_CR3) & ~0xff) & ~0xff);
 
 	flush_tlb();
 }
@@ -245,7 +245,7 @@ struct Page* alloc_page(u64 zone_type, u64 number, u64 flags)
 		zone_end = memory_desc.zones_size - 1;
 		break;
 	default:
-		_color_printk(RED, BLACK, "alloc_page error!\n");
+		color_printk(RED, BLACK, "alloc_page error!\n");
 		return nullptr;
 	}
 

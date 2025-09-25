@@ -1,13 +1,13 @@
 # @file: Makefile
 # @author: LinhengXilan
-# @data: 2025-9-14
-# @version: build14
+# @data: 2025-9-26
+# @version: build15
 
 RootDir = $(shell pwd)
 TOutputPath = $(RootDir)/../bin/
 TObjectPath = $(RootDir)/../obj/
 ImgPath = $(RootDir)/../img/
-UsbStorage = /dev/sdg1	# u盘分区的路径
+UsbStorage = /dev/sdf1	# u盘分区的路径
 
 MAKE = make
 ASM = nasm
@@ -56,7 +56,7 @@ clean:
 	cd kernel && $(MAKE) clean
 	rm -rf $(TObjectPath)
 	rm -rf $(TOutputPath)
-	rm -rf $(TImgPath)
+	rm -rf $(ImgPath)
 
 bochs:
 	bochs -debugger -f $(RootDir)/../bochsrc

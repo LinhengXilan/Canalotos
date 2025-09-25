@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/syscall.h
  * @author: LinhengXilan
- * @data: 2025-8-18
- * @version: build13
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #ifndef _KERNEL_SYSCALL_H_
@@ -17,7 +17,7 @@ typedef unsigned long long (*syscall_func)(struct Context* context);
 
 u64 no_syscall_func(struct Context* context)
 {
-	_color_printk(RED, BLACK, "Syscall error: no syscall function: 0x%x\n", context->rax);
+	 color_printk(RED, BLACK, "Syscall error: no syscall function: 0x%x\n", context->rax);
 	return -1;
 }
 

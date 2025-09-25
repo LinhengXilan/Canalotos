@@ -1,7 +1,7 @@
 # @file: kernel/Makefile
 # @author: LinhengXilan
-# @data: 2025-9-14
-# @version: build14
+# @data: 2025-9-26
+# @version: build15
 
 OutputPath = $(TOutputPath)kernel/
 ObjectPath = $(TObjectPath)kernel/
@@ -20,7 +20,9 @@ obj = $(ObjectPath)head.o\
 	$(ObjectPath)syscall/irq.o\
 	$(ObjectPath)syscall/syscall.o\
 	$(ObjectPath)process/process.o \
-	$(ObjectPath)process/switch.o
+	$(ObjectPath)process/switch.o \
+	$(ObjectPath)firmware/cpu.o \
+
 
 .PHONY: all disasm clean img
 
@@ -40,6 +42,7 @@ build_sub:
 	cd lib && $(MAKE)
 	cd syscall && $(MAKE)
 	cd process && $(MAKE)
+	cd firmware && $(MAKE)
 
 build: $(OutputPath)kernel.bin
 
@@ -59,6 +62,7 @@ clean:
 	cd lib && $(MAKE) clean
 	cd syscall && $(MAKE) clean
 	cd process && $(MAKE) clean
+	cd firmware && $(MAKE) clean
 	rm -rf $(OutputPath)
 	rm -rf $(ObjectPath)
 

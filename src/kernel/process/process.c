@@ -27,7 +27,7 @@ void ret_to_user();
  */
 void init_process()
 {
-	_color_printk(ORANGE, BLACK, "init_process()\n");
+	 color_printk(ORANGE, BLACK, "init_process()\n");
 	wrmsr(IA32_SYSENTER_CS, SELECTOR_KERNEL_CS);
 	wrmsr(IA32_SYSENTER_ESP, current_process->thread->rsp0);
 	wrmsr(IA32_SYSENTER_EIP, (u64)system_call);
@@ -89,11 +89,11 @@ u64 init_context(u64 (*func)(u64), u64 arg, u64 flags)
  */
 u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_size)
 {
-	_color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
+	 color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
 	struct Page* page = alloc_page(ZONE_NORMAL, 1, PAGE_TABLE_MAPPED | PAGE_ACTIVE | PAGE_KERNEL);
-	_color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
+	 color_printk(GREEN, BLACK, "alloc_pages, bitmap:%16x\n", *memory_desc.bits_map);
 	struct Process_struct* process = (struct Process_struct*)phy2vir(page->address);
-	_color_printk(GREEN, BLACK, "process address:%lx\n", (u64)process);
+	 color_printk(GREEN, BLACK, "process address:%lx\n", (u64)process);
 	memset(process, 0, sizeof(*process));
 	*process = *current_process;
 	list_init(&process->list);
@@ -118,7 +118,7 @@ u64 create_process(struct Context* regs, u64 flags, u64 stack_start, u64 stack_s
 
 u64 init(u64 arg)
 {
-	_color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
+	 color_printk(BLUE, BLACK, "init process is running, arg = 0x%lx\n", arg);
     current_process->thread->rip = (u64)ret_to_user;
     current_process->thread->rsp = (u64)current_process + PROCESS_STACK_SIZE - sizeof(struct Context);
 	struct Context* context = (struct Context*)current_process->thread->rsp;
@@ -135,7 +135,7 @@ u64 init(u64 arg)
 
 void do_process_exit(u64 code)
 {
-	_color_printk(BLUE, BLACK, "exit process is running, code = 0x%lx\n", code);
+	 color_printk(BLUE, BLACK, "exit process is running, code = 0x%lx\n", code);
 	while(1);
 }
 
@@ -164,15 +164,15 @@ void _switch_to(struct Process_struct* prev, struct Process_struct* next)
 		:
 		: "a"(next->thread->gs)
 	);
-	_color_printk(GREEN, BLACK, "prev->thread->rsp0:%x\n", prev->thread->rsp0);
-	_color_printk(GREEN, BLACK, "next->thread->rsp0:%x\n", next->thread->rsp0);
+	 color_printk(GREEN, BLACK, "prev->thread->rsp0:%x\n", prev->thread->rsp0);
+	 color_printk(GREEN, BLACK, "next->thread->rsp0:%x\n", next->thread->rsp0);
 }
 
 void user_func()
 {
-	_printk("userfunc: %x\n", user_func);
+	printk("userfunc: %x\n", user_func);
 	u64 ret = 0;
-	_color_printk(BLUE, BLACK, "user function is running\n");
+	 color_printk(BLUE, BLACK, "user function is running\n");
 	__asm__ __volatile(
 		"	leaq	sysexit_ret_addr(%%rip), %%rdx	\n\t"
 		"	movq	%%rsp, %%rcx					\n\t"
@@ -182,7 +182,7 @@ void user_func()
 		: "0"(8)
 		: "memory"
 	);
-	_color_printk(BLUE, BLACK, "user function called sysenter, ret: %d\n", ret);
+	 color_printk(BLUE, BLACK, "user function called sysenter, ret: %d\n", ret);
 	while (1);
 }
 
@@ -193,7 +193,7 @@ u64 do_exec(struct Context* context)
 	context->rax = 1;
 	context->ds = 0;
 	context->es = 0;
-	_color_printk(BLUE, BLACK, "do_exec() is running\n");
+	 color_printk(BLUE, BLACK, "do_exec() is running\n");
 	// memcpy((void*)0x800000, user_func, 1024);
 	return 0;
 }

@@ -1,7 +1,7 @@
 ; @file: boot/macro.inc
 ; @author: LinhengXilan
-; @data: 2025-7-29
-; @version: build11
+; @data: 2025-9-26
+; @version: build15
 
 ; segment attribute
 DA_64           equ 0x2000  ; 64-bit code segment
@@ -43,8 +43,8 @@ PG_RWW          equ 0x02    ; 可读写、可执行
 PG_USS          equ 0x00    ; 系统级
 PG_USU          equ 0x04    ; 用户级
 
-; 用法：Descriptor base, limit, attribute
-%macro Descriptor32 3
+; 用法：DESCRIPTOR32 base, limit, attribute
+%macro DESCRIPTOR32 3
 	dw %2 & 0xFFFF
 	dw %1 & 0xFFFF
 	db (%1 >> 16) & 0xFF
@@ -52,8 +52,8 @@ PG_USU          equ 0x04    ; 用户级
 	db (%1 >> 24) & 0xFF
 %endmacro
 
-; usage：Descriptor64 attribute
-%macro Descriptor 1
+; 用法：DESCRIPTOR attribute
+%macro DESCRIPTOR 1
 	dd 0
 	db 0
 	dw %1 & 0xF0FF

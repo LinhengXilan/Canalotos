@@ -1,10 +1,14 @@
 ; @file: boot/boot.asm
 ; @author: LinhengXilan
-; @data: 2025-9-14
-; @version: build14
+; @data: 2025-9-26
+; @version: build15
+
+ROOT_DIR_SECTORS      equ 14
+SECTOR_NUM_OF_ROOT_DIR  equ 25
+SECTOR_NUM_OF_FAT1     equ 1
 
 STACK_BASE      equ 0x7C00
-TEMP_BUFFER_OFFSET   equ 0x8000
+BUFFER_OFFSET   equ 0x8000
 LOADER_BASE     equ 0x1000
 LOADER_OFFSET   equ 0
 
@@ -14,6 +18,7 @@ LOADER_OFFSET   equ 0
 %include "FAT12.inc"
 
 Start:
+	cli
 	mov	    ax,	cs
 	mov	    ds,	ax
 	mov	    es,	ax
@@ -31,18 +36,18 @@ Start:
 	mov     dx, 0
 	int     0x10
 ; Search for loader.
-	mov     word [sectorNo], sectorNumOfRootDir
+	mov     word [sectorNo], SECTOR_NUM_OF_ROOT_DIR
 SearchFile:
 	cmp     word [rootDirSize], 0
-	jz      .FileNotFound
+	jz      .NotFound
 	dec     word [rootDirSize]
 	mov     eax, [sectorNo]
 	mov     cx, 1
 	mov     bx, 0
-	mov     dx, TEMP_BUFFER_OFFSET
+	mov     dx, BUFFER_OFFSET
 	call    ReadDisk
 	mov     si, loaderFileName
-	mov     di, TEMP_BUFFER_OFFSET
+	mov     di, BUFFER_OFFSET
 	cld
 	mov     dx, 0x10
 .SearchLoader:
@@ -52,7 +57,7 @@ SearchFile:
 	mov     cx, 11
 .CmpFileName:
 	cmp     cx, 0
-	jz      .FileFound
+	jz      .Found
 	dec     cx
 	lodsb
 	cmp     al, byte [es:di]
@@ -69,7 +74,7 @@ SearchFile:
 .NextSector:
 	add     word [sectorNo], 1
 	jmp     SearchFile
-.FileNotFound:
+.NotFound:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
 	mov     dx, 0x100
@@ -78,17 +83,17 @@ SearchFile:
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, msg_NoLoader
+	mov     bp, msgNoLoader
 	int     0x10
 	jmp     $
-.FileFound:
+.Found:
 	and     di, 0xFFE0  ; 定位到此目录项起始地址
 	add     di, 0x1A    ; 文件起始簇号
 	mov     ax, word[es:di]
 	mov     word [clusterNo], ax
-	mov     eax, sectorNumOfFAT1
+	mov     eax, SECTOR_NUM_OF_FAT1
     mov     bx, 0
-    mov     dx, TEMP_BUFFER_OFFSET
+    mov     dx, BUFFER_OFFSET
     mov     cx, word [BPB_FATSz16]
     call    ReadDisk
 .LoadFile:
@@ -105,10 +110,10 @@ SearchFile:
 	call    GetNextFAT
 	cmp     ax, 0xFFF
 	jnz     .LoadFile
-.FileLoaded:
+.Loaded:
 	jmp     LOADER_BASE:LOADER_OFFSET
 
-; void ReadDisk(eax lba, cx nr_sectors, bx buffer_base, dx TEMP_BUFFER_OFFSET);
+; void ReadDisk(eax lba, cx nr_sectors, bx buffer_base, dx buffer_offset);
 ; Read disk.
 ReadDisk:
 	mov     dword [diskLba], eax
@@ -130,7 +135,7 @@ GetNextFAT:
 	mov     word [odd], dx
 	mov     bl, 3
 	mul     bl
-	mov     si, TEMP_BUFFER_OFFSET
+	mov     si, BUFFER_OFFSET
 	add     si, ax
 	cmp     byte [odd], 1
 	jz      .1
@@ -145,14 +150,14 @@ GetNextFAT:
 	mov     word [clusterNo], ax
 	ret
 
-rootDirSize dw rootDirSectors
+rootDirSize dw ROOT_DIR_SECTORS
 sectorNo    dw 0
 clusterNo   dw 0
 odd db 0
 
 loaderFileName:
 	db "LOADER  BIN", 0
-msg_NoLoader:
+msgNoLoader:
 	db "cannot find file loader.bin"
 
 diskPack:

@@ -1,11 +1,7 @@
 ; @file: boot/FAT12.inc
 ; @author: LinhengXilan
-; @data: 2025-9-14
-; @version: build14
-
-rootDirSectors      equ 14
-sectorNumOfRootDir  equ 25
-sectorNumOfFAT1     equ 1
+; @data: 2025-9-26
+; @version: build15
 
 BS_OEMName      db 'Canaloto'
 BPB_BytesPerSec dw 0x200

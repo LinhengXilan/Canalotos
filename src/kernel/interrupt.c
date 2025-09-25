@@ -1,8 +1,8 @@
 /**
  * @file: kernel/traps.c
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #include <kernel/types.h>
@@ -16,7 +16,7 @@ PRIVATE void init_IDT_DESC(u8 IDTIndex, u8 gateType, u8 privilege, int_handler h
 
 void init_IDT()
 {
-	_color_printk(ORANGE, BLACK, "init_IDT()\n");
+	 color_printk(ORANGE, BLACK, "init_IDT()\n");
 	init_IDT_DESC(0x00, DA_386IGate, DA_DPL0, _divide_error);
 	init_IDT_DESC(0x01, DA_386IGate, DA_DPL0, _debug);
 	init_IDT_DESC(0x02, DA_386IGate, DA_DPL0, _nmi);
@@ -57,197 +57,197 @@ void init_IDT()
 void do_divide_error(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "divide_error, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "divide_error, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_debug(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "debug, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "debug, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_nmi(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "nmi, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "nmi, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_breakpoint(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "breakpoint, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "breakpoint, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_overflow(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "overflow, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "overflow, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_bounds(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "bounds, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "bounds, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_undefined_opcode(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "undefined_opcode, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "undefined_opcode, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_device_not_available(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "device_not_available, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "device_not_available, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_double_fault(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "double_fault, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "double_fault, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_coprocessor_segment_overrun(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "coprocessor_segment_overrun, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "coprocessor_segment_overrun, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_invalid_TSS(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "invalid_tss, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "invalid_tss, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	if (error_code & 0x01)
 	{
-		_color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program,such as an interrupt or an earlier exception.\n");
+		 color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program,such as an interrupt or an earlier exception.\n");
 	}
 	if (error_code & 0x02)
 	{
-		_color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
+		 color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
+		 color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
 	}
 	if ((error_code & 0x02) == 0)
 	{
 		if (error_code & 0x04)
 		{
-			_color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
+			 color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
 		}
 		else
 		{
-			_color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
+			 color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
 		}
 	}
-	_color_printk(RED, BLACK, "Segment Selector Index:%x\n", error_code & 0xfff8);
+	 color_printk(RED, BLACK, "Segment Selector Index:%x\n", error_code & 0xfff8);
 	while(1);
 }
 
 void do_segment_not_present(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "segment_not_present,ERROR_CODE:%12lx,RSP:%12lx,RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "segment_not_present,ERROR_CODE:%12lx,RSP:%12lx,RIP:%12lx\n", error_code, rsp, *p);
 
 	if (error_code & 0x01)
 	{
-		_color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program,such as an interrupt or an earlier exception.\n");
+		 color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program,such as an interrupt or an earlier exception.\n");
 	}
 	if (error_code & 0x02)
 	{
-		_color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
+		 color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
+		 color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
 	}
 	if ((error_code & 0x02) == 0)
 	{
 		if (error_code & 0x04)
 		{
-			_color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
+			 color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
 		}
 		else
 		{
-			_color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
+			 color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
 		}
 	}
-	_color_printk(RED, BLACK, "Segment Selector Index:%#010x\n",error_code & 0xfff8);
+	 color_printk(RED, BLACK, "Segment Selector Index:%#010x\n",error_code & 0xfff8);
 	while(1);
 }
 
 void do_stack_segment_fault(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "stack_segment_fault,ERROR_CODE:%12lx,RSP:%12lx,RIP:%12lx\n", error_code, rsp, *p);
+	 color_printk(RED, BLACK, "stack_segment_fault,ERROR_CODE:%12lx,RSP:%12lx,RIP:%12lx\n", error_code, rsp, *p);
 
 	if (error_code & 0x01)
 	{
-		_color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program.\n");
+		 color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program.\n");
 	}
 	if (error_code & 0x02)
 	{
-		_color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
+		 color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
+		color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
 	}
 
 	if ((error_code & 0x02) == 0)
 	{
 		if (error_code & 0x04)
 		{
-			_color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
+			color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
 		}
 		else
 		{
-			_color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
+			color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
 		}
 	}
-	_color_printk(RED, BLACK, "Segment Selector Index:%x\n", error_code & 0xfff8);
+	color_printk(RED, BLACK, "Segment Selector Index:%x\n", error_code & 0xfff8);
 	while(1);
 }
 
 void do_general_protection(u64 rsp,u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "general_protection, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "general_protection, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	if (error_code & 0x01)
 	{
-		_color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program.\n");
+		color_printk(RED, BLACK, "The exception occurred during delivery of an event external to the program.\n");
 	}
 	if (error_code & 0x02)
 	{
-		_color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
+		color_printk(RED, BLACK, "Refers to a gate descriptor in the IDT;\n");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
+		color_printk(RED, BLACK, "Refers to a descriptor in the GDT or the current LDT;\n");
 	}
 	if ((error_code & 0x02) == 0)
 	{
 		if (error_code & 0x04)
 		{
-			_color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
+			color_printk(RED, BLACK, "Refers to a segment or gate descriptor in the LDT;\n");
 		}
 		else
 		{
-			_color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
+			color_printk(RED, BLACK, "Refers to a descriptor in the current GDT;\n");
 		}
 	}
-	_color_printk(RED, BLACK, "Segment Selector Index:%x\n",error_code & 0xfff8);
+	color_printk(RED, BLACK, "Segment Selector Index:%x\n",error_code & 0xfff8);
 	while(1);
 }
 
@@ -261,79 +261,79 @@ void do_page_fault(u64 rsp, u64 error_code)
 		:
 		: "memory"
 	);
-	_color_printk(RED, BLACK, "page_fault, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "page_fault, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	if (!(error_code & 0x01))
 	{
-		_color_printk(RED, BLACK, "Page Not-Present,\t");
+		color_printk(RED, BLACK, "Page Not-Present,\t");
 	}
 	if (error_code & 0x02)
 	{
-		_color_printk(RED, BLACK, "Write Cause Fault,\t");
+		color_printk(RED, BLACK, "Write Cause Fault,\t");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Read Cause Fault,\t");
+		color_printk(RED, BLACK, "Read Cause Fault,\t");
 	}
 	if (error_code & 0x04)
 	{
-		_color_printk(RED, BLACK, "Fault in user(3)\t");
+		color_printk(RED, BLACK, "Fault in user(3)\t");
 	}
 	else
 	{
-		_color_printk(RED, BLACK, "Fault in supervisor(0,1,2)\t");
+		color_printk(RED, BLACK, "Fault in supervisor(0,1,2)\t");
 	}
 	if (error_code & 0x08)
 	{
-		_color_printk(RED, BLACK, ",Reserved Bit Cause Fault\t");
+		color_printk(RED, BLACK, ",Reserved Bit Cause Fault\t");
 	}
 	if (error_code & 0x10)
 	{
-		_color_printk(RED, BLACK, ",Instruction fetch Cause Fault");
+		color_printk(RED, BLACK, ",Instruction fetch Cause Fault");
 	}
-	_color_printk(RED, BLACK, "\n");
-	_color_printk(RED, BLACK, "CR2:%12lx\n",cr2);
+	color_printk(RED, BLACK, "\n");
+	color_printk(RED, BLACK, "CR2:%12lx\n",cr2);
 	while(1);
 }
 
 void do_coprocessor_error(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "coprocessor_error, ERROR_CODE:%12lx, RSP:%x, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "coprocessor_error, ERROR_CODE:%12lx, RSP:%x, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_x87_FPU_error(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "x87_FPU_error, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "x87_FPU_error, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_alignment_check(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "alignment_check, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "alignment_check, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_machine_check(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "machine_check, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "machine_check, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_SIMD_exception(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "SIMD_exception, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "SIMD_exception, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 
 void do_virtualization_exception(u64 rsp, u64 error_code)
 {
 	const u64* p = (u64*)(rsp + 0x98);
-	_color_printk(RED, BLACK, "virtualization_exception, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
+	color_printk(RED, BLACK, "virtualization_exception, ERROR_CODE:%12lx, RSP:%12lx, RIP:%12lx\n", error_code, rsp, *p);
 	while(1);
 }
 

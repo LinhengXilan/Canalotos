@@ -1,46 +1,58 @@
 ; @file: boot/loader.asm
 ; @author: LinhengXilan
-; @data: 2025-9-14
-; @version: build14
+; @data: 2025-9-26
+; @version: build15
 
 %include "macro.inc"
 
 	org     0x10000
-	jmp     _Start
+	jmp     Start
+	nop
+;%include "FAT12.inc"
 
-%include "FAT12.inc"
+ROOT_DIR_SECTORS      equ 14
+SECTOR_NUM_OF_ROOT_DIR  equ 25
+SECTOR_NUM_OF_FAT1     equ 1
 
-BaseOfKernel equ 0
-OffsetOfKernel equ 0x100000
-BaseTmpOfKernel equ 0x9000
-OffsetTmpOfKernel equ 0x0
-MemoryStructBuffer equ 0x7E00
-BaseOfBuffer    equ 0x0
-OffsetOfBuffer equ 0x8000
+KERNEL_BASE equ 0
+KERNEL_OFFSET equ 0x100000
+KERNEL_TEMP_BASE equ 0x9000
+KERNEL_TEMP_OFFSET equ 0x0
+MEMORY_STRUCT equ 0x7E00
+BUFFER_BASE equ 0x0
+BUFFER_OFFSET equ 0x8000
 
 [section .gdt]
-GDT32:              Descriptor32 0,          0,       0
-GDT_Kernel_Code32:  Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_CR
-GDT_Kernel_Data32:  Descriptor32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_DRW
-GdtLen32 equ $ - GDT32
-GdtPtr32    dw GdtLen32 - 1
-			dd GDT32
-Selector_Kernel_Code32 equ GDT_Kernel_Code32 - GDT32
-Selector_Kernel_Data32 equ GDT_Kernel_Data32 - GDT32
+gdt:
+	DESCRIPTOR32 0, 0, 0
+gdtKernelCode:
+	DESCRIPTOR32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_CR
+gdtKernelData:
+	DESCRIPTOR32 0x00000000, 0xFFFFF, DA_32 | DA_LIMIT_4K | DA_DRW
+GDT_LEN equ $ - gdt
+gdtPtr:
+	dw GDT_LEN - 1
+	dd gdt
+SELECTOR_KERNEL_CODE equ gdtKernelCode - gdt
+SELECTOR_KERNEL_DATA equ gdtKernelData - gdt
 
 [section .gdt64]
-GDT:		        Descriptor 0
-GDT_Kernel_Code:	Descriptor DA_64 | DA_CR
-GDT_Kernel_Data:	Descriptor DA_DRW
-GdtLen equ $ - GDT
-GdtPtr  dw GdtLen - 1
-		dd GDT
-Selector_Kernel_Code	equ	GDT_Kernel_Code - GDT
-Selector_Kernel_Data	equ	GDT_Kernel_Data - GDT
+gdt64:
+	DESCRIPTOR 0
+gdtKernelCode64:
+	DESCRIPTOR DA_64 | DA_CR
+gdtKernelData64:
+	DESCRIPTOR DA_DRW
+GDT_LEN64 equ $ - gdt64
+gdtPtr64:
+	dw GDT_LEN64 - 1
+	dd gdt64
+SELECTOR_KERNEL_CODE64 equ gdtKernelCode64 - gdt64
+SELECTOR_KERNEL_DATA64 equ gdtKernelData64 - gdt64
 
-[section .s16]
+[section .text16]
 [bits 16]
-_Start:
+Start:
 	mov     ax, cs
 	mov     ds, ax
 	mov     es, ax
@@ -54,32 +66,32 @@ _Start:
 	out     0x92, al
 	pop     ax
 	cli
-	lgdt    [GdtPtr32]
+; 强制使fs寄存器获得32位寻址能力
+	lgdt    [gdtPtr]
 	mov     eax, cr0
 	or      eax, 1
 	mov     cr0, eax
-	mov     ax, Selector_Kernel_Data32
+	mov     ax, SELECTOR_KERNEL_DATA
 	mov     fs, ax
 	mov     eax, cr0
 	and     al, 0b11111110
 	mov     cr0, eax
 	sti
-
-; Search kernel.bin.
-	mov     word [sectorNo], sectorNumOfRootDir
+; 搜索kernel.bin.
+	mov     word [sectorNo], SECTOR_NUM_OF_ROOT_DIR
 SearchInRootDir:
 	cmp     word [rootDirSize], 0
 	jz      .NoKernel
-	mov     ax, BaseOfBuffer
+	mov     ax, BUFFER_BASE
 	mov     es, ax
 	dec     word [rootDirSize]
 	mov     eax, [sectorNo]
 	mov     cl, 1
-	mov     bx, BaseOfBuffer
-	mov     dx, OffsetOfBuffer
+	mov     bx, BUFFER_BASE
+	mov     dx, BUFFER_OFFSET
 	call    ReadDisk
 	mov     si, kernelFileName
-	mov     di, OffsetOfBuffer
+	mov     di, BUFFER_OFFSET
 	cld
 	mov     dx, 0x10
 .SearchKernel:
@@ -89,7 +101,7 @@ SearchInRootDir:
 	mov     cx, 11
 .CmpFileName:
 	cmp     cx, 0
-	jz      .FileFound
+	jz      .Found
 	dec     cx
 	lodsb
 	cmp     al, byte [es:di]
@@ -115,18 +127,18 @@ SearchInRootDir:
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, MSG_NoKernel
+	mov     bp, msgNoKernel
 	int     0x10
 	jmp     $
-.FileFound: ; 0x10128
+.Found:
 	and     di, 0xFFE0  ; 定位到此目录项起始地址
 	add     di, 0x1A    ; 文件起始簇号
 	mov     ax, word[es:di]
 	mov     word [clusterNo], ax
-	mov     eax, sectorNumOfFAT1
-    mov     bx, BaseOfBuffer
-    mov     dx, OffsetOfBuffer
-    mov     cx, word [BPB_FATSz16]
+	mov     eax, SECTOR_NUM_OF_FAT1
+    mov     bx, BUFFER_BASE
+    mov     dx, BUFFER_OFFSET
+    mov     cx, word 0xC
     call    ReadDisk
 .LoadFile:
 	mov     ax, word [clusterNo]
@@ -135,8 +147,8 @@ SearchInRootDir:
 	mul     bl
 	add     ax, 57
 	mov     cx, 4
-	mov     bx, BaseTmpOfKernel
-	mov     dx, OffsetTmpOfKernel
+	mov     bx, KERNEL_TEMP_BASE
+	mov     dx, KERNEL_TEMP_OFFSET
 	call    ReadDisk
 	push	cx
 	push	eax
@@ -144,31 +156,29 @@ SearchInRootDir:
 	push	ds
 	push	esi
 	mov     cx,	0x800
-	mov     edi, dword [OffsetOfKernelCount]
-	mov     ax,	BaseTmpOfKernel
+	mov     edi, dword [kernelByteCount]
+	mov     ax,	KERNEL_TEMP_BASE
 	mov     ds,	ax
-	mov     esi, OffsetTmpOfKernel
+	mov     esi, KERNEL_TEMP_OFFSET
 MoveKernel:
 	mov     al,	byte [ds:esi]
 	mov     byte [fs:edi], al
 	inc     esi
 	inc     edi
 	loop    MoveKernel
-	mov     ax, 0x1000     ; 0x10189
+	mov     ax, 0x1000  ; 0x1014c
 	mov     ds,	ax
-	mov     dword [OffsetOfKernelCount], edi
+	mov     dword [kernelByteCount], edi
 	pop     esi
 	pop     ds
 	pop     edi
 	pop     eax
 	pop     cx
-
-
 	mov     ax, word [clusterNo]
-    call    GetNextFAT  ; 0x101a1
+    call    GetNextFAT
 	cmp     ax,	0FFFh
 	jz      .FileLoaded
-	jmp     SearchInRootDir.LoadFile ; 有问题
+	jmp     SearchInRootDir.LoadFile
 .FileLoaded:
 	mov     ax, 0xB800
 	mov     gs, ax
@@ -180,20 +190,18 @@ MoveKernel:
 	mov     ebx, 0
 	mov     ax, 0
 	mov     es, ax
-	mov     di, MemoryStructBuffer
-_GetMemoryStruct:
+	mov     di, MEMORY_STRUCT
+GetMemoryStruct:
 	mov     eax, 0xE820
 	mov     ecx, 20
 	mov     edx, 0x534D4150
 	int     0x15
-	jc      .GetMemoryFail
+	jc      .Fail
 	add     di, 20
-	inc     dword [MemStructNumber]
 	cmp     ebx, 0
-	jne     _GetMemoryStruct
-	jmp     .GetMemorySuccess
-.GetMemoryFail:
-	mov	dword [MemStructNumber], 0
+	jne     GetMemoryStruct
+	jmp     .Success
+.Fail:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
 	mov     dx, 0x500
@@ -202,18 +210,19 @@ _GetMemoryStruct:
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, MSG_GetMemStructError
+	mov     bp, msgGetMemStructError
 	int     0x10
-.GetMemorySuccess:
-_GetSVGAInfo:
-	mov     ax, 0
+.Success:
+; 获取VBE信息
+GetSVGAInfo:
+	xor     ax, ax  ; 0x101cc
 	mov     es, ax
 	mov     di, 0x8000
-	mov     ax, 0x4F00
+	mov     ax, 0x4F00  ; 0b01001000'00000000
 	int     0x10
 	cmp     ax, 0x4F
-	jz      .KO
-; Fail.
+	jz      .Success
+; 获取VBE信息失败
 	mov     ax, 0x1301
 	mov     bx, 0x8C
 	mov     dx, 0x900
@@ -222,29 +231,31 @@ _GetSVGAInfo:
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, MSG_GetSVGAInfoError
+	mov     bp, msgGetSVGAInfoError
 	int     0x10
 	jmp     $
-
-.KO:
+.Success:
 	mov     ax, 0
 	mov     es, ax
 	mov     si, 0x800E
 	mov     esi, dword [es:si]
 	mov     edi, 0x8200
-_GetSVGAMode:
+GetSVGAMode:
 	mov     cx, word [es:esi]
+.DisplaySVGAInfo:
+
+
 	cmp     cx, 0xFFFF
-	jz      .GetSVGAModeFinish
+	jz      SetSVGAMode
 	mov     ax, 0x4F01
 	int     0x10
 	cmp     ax, 0x4F
-	jnz     .GetSVGAModeFail
+	jnz     .Fail
 	inc     dword [SVGAModeCounter]
 	add     esi, 2
 	add     edi, 0x100
-	jmp     _GetSVGAMode
-.GetSVGAModeFail:
+	jmp     GetSVGAMode
+.Fail:
 	mov     ax, 0x1301
 	mov     bx, 0x8C
 	mov     dx, 0xD00
@@ -253,23 +264,25 @@ _GetSVGAMode:
 	mov     ax, ds
 	mov     es, ax
 	pop     ax
-	mov     bp, MSG_GetSVGAModeError
+	mov     bp, msgGetSVGAModeError
 	int     0x10
-.SetSVGAModeFail:
-	jmp     $
-.GetSVGAModeFinish:
+SetSVGAMode:
 	mov     ax, 0x4F02
 	mov     bx, 0x4180
 	int     0x10
 	cmp     ax, 004Fh
-	jnz     .SetSVGAModeFail
+	jnz     .Fail
+	jmp     SetProtectMode
+.Fail:
+	jmp     $
 ; Enter temp protect mode.
+SetProtectMode:
 	cli
-	lgdt    [GdtPtr32]
+	lgdt    [gdtPtr]
 	mov     eax, cr0
 	or      eax, 1
 	mov     cr0, eax
-	jmp     dword Selector_Kernel_Code32:GoToTempProtect
+	jmp     dword SELECTOR_KERNEL_CODE64:GoToTempProtect
 
 [SECTION .s32]
 [BITS 32]
@@ -281,7 +294,7 @@ GoToTempProtect:
 	mov     fs, ax
 	mov     ss, ax
 	mov     esp, 0x7E00
-	call    _Support_long_mode
+	call    SupportLongMode
 	test    eax, eax
 	jz	no_support
 ; Setup temporary page table.
@@ -304,7 +317,7 @@ GoToTempProtect:
 	mov dword [0x92028], 0xa00083
 	mov dword [0x9202c], 0x000000
 
-	lgdt    [GdtPtr]
+	lgdt    [gdtPtr64]
 	mov     ax, 0x10
 	mov     ds, ax
 	mov     es, ax
@@ -329,18 +342,18 @@ GoToTempProtect:
 	bts     eax, 0
 	bts     eax, 31
 	mov     cr0, eax
-	jmp     Selector_Kernel_Code:OffsetOfKernel  ;0x1036b
+	jmp     SELECTOR_KERNEL_CODE64:KERNEL_OFFSET  ;0x1036b
 
 [section .lib16]
 [bits 16]
 ; void ReadDisk(eax lba, cx nr_sectors, bx buffer_base, dx buffer_offset);
 ; Read disk.
 ReadDisk:
-	mov     dword [disk_lba], eax
-	mov     word [disk_nr_sectors], cx
-	mov     word [disk_buffer_base], bx      ; base of buffer
-	mov     word [disk_buffer_offset], dx      ; base of buffer
-	mov     si, disk_pack
+	mov     dword [diskLba], eax
+	mov     word [diskNrSectors], cx
+	mov     word [diskBufferBase], bx      ; base of buffer
+	mov     word [diskBufferOffset], dx      ; base of buffer
+	mov     si, diskPack
 	mov     ah, 0x42    ; function number: read disk
 	mov     dl, 0x80    ; disk drive number
 	int     0x13
@@ -353,11 +366,11 @@ GetNextFAT:
 	mov     word [odd], dx
 	mov     bl, 3
 	mul     bl
-	mov     si, OffsetOfBuffer
+	mov     si, BUFFER_OFFSET
 	add     si, ax
 	cmp     byte [odd], 1
 	push    ds
-	mov     ax, BaseOfBuffer
+	mov     ax, BUFFER_BASE
 	mov     ds, ax
 	jz      .1
 	lodsw
@@ -374,7 +387,7 @@ GetNextFAT:
 
 [section .lib32]
 [bits 32]
-_Support_long_mode:
+SupportLongMode:
 	mov     eax, 0x80000000
 	cpuid
 	cmp     eax, 0x80000001
@@ -390,31 +403,34 @@ _Support_long_mode:
 no_support:
 	jmp     $
 
-rootDirSize	dw rootDirSectors
+rootDirSize	dw ROOT_DIR_SECTORS
 sectorNo dw 0
 odd db 0
-OffsetOfKernelCount dd OffsetOfKernel
+kernelByteCount dd KERNEL_OFFSET
 MemStructNumber dd 0
 SVGAModeCounter dd 0
 clusterNo dw 0
 
-disk_pack:
+diskPack:
 	db      0x10
 	db      0
-disk_nr_sectors:
+diskNrSectors:
 	dw      0
-disk_buffer_offset:
+diskBufferOffset:
 	dw      0
-disk_buffer_base:
+diskBufferBase:
 	dw      0
-disk_lba:
+diskLba:
 	dd      0
 	dd      0
 
-MSG_NoKernel: db "ERROR:No KERNEL Found"
-kernelFileName: db "KERNEL  BIN", 0
-MSG_GetMemStructError: db "Get Memory Struct ERROR"
-MSG_GetSVGAInfoError: db "Get SVGA VBE Info ERROR"
-MSG_GetSVGAModeError: db "Get SVGA Mode Info ERROR"
-
-MSG_NoLoader: db "123"
+msgNoKernel:
+	db "ERROR:No KERNEL Found"
+kernelFileName:
+	db "KERNEL  BIN", 0
+msgGetMemStructError:
+	db "Get Memory Struct ERROR"
+msgGetSVGAInfoError:
+	db "Get SVGA VBE Info ERROR"
+msgGetSVGAModeError:
+	db "Get SVGA Mode Info ERROR"

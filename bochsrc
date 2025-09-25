@@ -7,7 +7,7 @@ romimage: file="/usr/local/share/bochs/BIOS-bochs-latest", address=0x00000000, o
 vgaromimage: file="/usr/local/share/bochs/VGABIOS-lgpl-latest.bin"
 boot: disk
 ata0: enabled=true, ioaddr1=0x1f0, ioaddr2=0x3f0, irq=14
-ata0-master: type=disk, path=/dev/sdg1, mode=flat   # 在此处修改U盘分区路径
+ata0-master: type=disk, path=/dev/sdf1, mode=flat   # 在此处修改U盘分区路径
 ata0-slave: type=none
 ata1: enabled=false
 ata2: enabled=false
@@ -22,7 +22,7 @@ optramimage3: file=none
 optramimage4: file=none
 pci: enabled=0
 vga: extension=vbe, update_freq=10, realtime=1, ddc=builtin, vbe_memsize=16
-cpu: count=1, ips=4000000, model=core2_penryn_t9600, reset_on_triple_fault=1, cpuid_limit_winnt=0, ignore_bad_msrs=1, mwait_is_nop=0
+cpu: count=1, ips=4000000, model=arrow_lake, reset_on_triple_fault=1, cpuid_limit_winnt=0, ignore_bad_msrs=1, mwait_is_nop=0
 print_timestamps: enabled=0
 debugger_log: -
 magic_break: enabled=1 0x0

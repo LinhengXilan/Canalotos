@@ -1,12 +1,12 @@
 ; @file: kernel/head.asm
 ; @author: LinhengXilan
-; @data: 2025-8-16
-; @version: build12
+; @data: 2025-9-26
+; @version: build15
 
 %include "macro.inc"
 
-extern _kernel_main
-extern _color_printk
+extern kernel_main
+extern  color_printk
 extern _init_process
 
 global _start
@@ -101,7 +101,7 @@ Setup_TSS:
 	retf
 
 IStartKernel:
-	dq      _kernel_main
+	dq      kernel_main
 
 ; The default interrupt handler save all general registers and print message "Unknown Interrupt".
 ignore_int:
@@ -134,7 +134,7 @@ ignore_int:
     mov     rsi, 0
     mov     rdi, 0x00FF0000
     mov     rax, 0
-    call    _color_printk
+    call     color_printk
     add     rsp, 0x8
 Loop:
     jmp     Loop

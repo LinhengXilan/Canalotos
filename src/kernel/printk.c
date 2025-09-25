@@ -1,8 +1,8 @@
 /**
- * @file: kernel/printk.c
+ * @file: kernel/Printk.c
  * @author: LinhengXilan
- * @data: 2025-8-18
- * @version: build13
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #include <kernel/types.h>
@@ -13,8 +13,8 @@
 
 #include <kernel/printk.h>
 
-PRIVATE char* _itoa_32(char* buffer, u32 number, u8 precision);
-PRIVATE char* _itoa(char* buffer, u64 number, u8 base, u8 precision);
+PRIVATE char* itoa_32(char* buffer, u32 number, u8 precision);
+PRIVATE char* itoa(char* buffer, u64 number, u8 base, u8 precision);
 
 void init_screen()
 {
@@ -28,12 +28,12 @@ void init_screen()
 	screen.bufferSize = screen.Position.x * screen.Position.y * 4 + PAGE_4K - 1 & PAGE_4K_MASK;
 }
 
-int _printk(const char* format, ...)
+int printk(const char* format, ...)
 {
 	char buffer[1024] = {0};
 	va_list args;
 	va_start(args, format);
-	int i = _vsprintf(buffer, format, args);
+	int i = vsprintf(buffer, format, args);
 	va_end(args);
 	for (int j = 0; j < i; j++)
 	{
@@ -47,32 +47,32 @@ int _printk(const char* format, ...)
 		case '\t':
 			do
 			{
-				_putchar(WHITE, BLACK, ' ');
+				putchar(WHITE, BLACK, ' ');
 			} while (screen.Position.x % (screen.CharSize.x * 4) != 0);
 			continue;
 		case '\'':
-			_putchar(WHITE, BLACK, '\'');
+			putchar(WHITE, BLACK, '\'');
 			continue;
 		case '\"':
-			_putchar(WHITE, BLACK, '\"');
+			putchar(WHITE, BLACK, '\"');
 			continue;
 		case '\\':
-			_putchar(WHITE, BLACK, '\\');
+			putchar(WHITE, BLACK, '\\');
 			continue;
 		default:
 			break;
 		}
-		_putchar(WHITE, BLACK, buffer[j]);
+		putchar(WHITE, BLACK, buffer[j]);
 	}
 	return i;
 }
 
-int _color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
+int color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
 {
 	char buffer[1024] = {0};
 	va_list args;
 	va_start(args, format);
-	int i = _vsprintf(buffer, format, args);
+	int i = vsprintf(buffer, format, args);
 	va_end(args);
 	for (int j = 0; j < i; j++)
 	{
@@ -86,27 +86,27 @@ int _color_printk(u32 frontColor, u32 backgroundColor, const char* format, ...)
 		case '\t':
 			do
 			{
-				_putchar(frontColor, backgroundColor, ' ');
+				putchar(frontColor, backgroundColor, ' ');
 			} while (screen.Position.x % (screen.CharSize.x * 4) != 0);
 			continue;
 		case '\'':
-			_putchar(frontColor, backgroundColor, '\'');
+			putchar(frontColor, backgroundColor, '\'');
 			continue;
 		case '\"':
-			_putchar(frontColor, backgroundColor, '\"');
+			putchar(frontColor, backgroundColor, '\"');
 			continue;
 		case '\\':
-			_putchar(frontColor, backgroundColor, '\\');
+			putchar(frontColor, backgroundColor, '\\');
 			continue;
 		default:
 			break;
 		}
-		_putchar(frontColor, backgroundColor, buffer[j]);
+		putchar(frontColor, backgroundColor, buffer[j]);
 	}
 	return i;
 }
 
-int _vsprintf(char* buffer, const char* format, va_list args)
+int vsprintf(char* buffer, const char* format, va_list args)
 {
 	char* pbuffer = buffer;
 	u8 flag_format = FALSE;
@@ -131,11 +131,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 			case 'b':
 				if (flag_long == TRUE)
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u64), 2, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u64), 2, precision);
 				}
 				else
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u32), 2, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u32), 2, precision);
 				}
 				flag_format = FALSE;
 				flag_long = FALSE;
@@ -153,11 +153,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 					if (n < 0)
 					{
 						*pbuffer++ = '-';
-						pbuffer = _itoa(pbuffer, -n, 10, precision);
+						pbuffer = itoa(pbuffer, -n, 10, precision);
 					}
 					else
 					{
-						pbuffer = _itoa(pbuffer, n, 10, precision);
+						pbuffer = itoa(pbuffer, n, 10, precision);
 					}
 				}
 				else
@@ -166,11 +166,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 					if (n < 0)
 					{
 						*pbuffer++ = '-';
-						pbuffer = _itoa_32(pbuffer, -n, precision);
+						pbuffer = itoa_32(pbuffer, -n, precision);
 					}
 					else
 					{
-						pbuffer = _itoa_32(pbuffer, n, precision);
+						pbuffer = itoa_32(pbuffer, n, precision);
 					}
 				}
 				flag_format = FALSE;
@@ -183,11 +183,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 			case 'o':
 				if (flag_long == TRUE)
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u64), 8, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u64), 8, precision);
 				}
 				else
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u32), 8, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u32), 8, precision);
 				}
 				flag_format = FALSE;
 				flag_long = FALSE;
@@ -205,11 +205,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 			case 'u':
 				if (flag_long == TRUE)
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u64), 10, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u64), 10, precision);
 				}
 				else
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u32), 10, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u32), 10, precision);
 				}
 				flag_format = FALSE;
 				flag_long = FALSE;
@@ -218,11 +218,11 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 			case 'x':
 				if (flag_long == TRUE)
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u64), 16, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u64), 16, precision);
 				}
 				else
 				{
-					pbuffer = _itoa(pbuffer, va_arg(args, u32), 16, precision);
+					pbuffer = itoa(pbuffer, va_arg(args, u32), 16, precision);
 				}
 				flag_format = FALSE;
 				flag_long = FALSE;
@@ -243,7 +243,7 @@ int _vsprintf(char* buffer, const char* format, va_list args)
 	return pbuffer - buffer;
 }
 
-void _putchar(u32 frontColor, u32 backgroundColor, u8 character)
+void putchar(u32 frontColor, u32 backgroundColor, u8 character)
 {
 	u32* base_addr = screen.bufferAddress;
 	u16 x = screen.Position.x;
@@ -277,7 +277,7 @@ void _putchar(u32 frontColor, u32 backgroundColor, u8 character)
  * @return 转换后的字符串指针
  * @note PRIVATE
  */
-PRIVATE char* _itoa_32(char* buffer, u32 number, u8 precision)
+PRIVATE char* itoa_32(char* buffer, u32 number, u8 precision)
 {
 	char temp_buffer[32];
 	int n = 0;
@@ -310,7 +310,7 @@ PRIVATE char* _itoa_32(char* buffer, u32 number, u8 precision)
  * @return 转换后的字符串指针
  * @note PRIVATE
  */
-PRIVATE char* _itoa(char* buffer, u64 number, u8 base, u8 precision)
+PRIVATE char* itoa(char* buffer, u64 number, u8 base, u8 precision)
 {
 	char temp_buffer[64];
 	int n = 0;

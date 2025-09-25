@@ -1,8 +1,8 @@
 /**
  * @file: include/kernel/screen.h
  * @author: LinhengXilan
- * @data: 2025-7-29
- * @version: build11
+ * @data: 2025-9-26
+ * @version: build15
  **/
 
 #ifndef _KERNEL_PRINTK_H_
@@ -30,5 +30,7 @@ struct Screen
 	u32* bufferAddress;
 	u64 bufferSize;
 };
+
+#define VBEINFOBLOCK_ADDR	0x8000
 
 #endif
