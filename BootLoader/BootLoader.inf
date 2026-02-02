@@ -1,12 +1,14 @@
 [Defines]
 	INF_VERSION = 0x0001FFFF
-	BASE_NAME = CanalotosBoot
+	BASE_NAME = Bootx64
 	FILE_GUID = 969701d7-7aed-4972-8ebd-62dd42d13fe8
 	MODULE_TYPE = UEFI_APPLICATION
 	VERSION_STRING = 0.0.0.1
 	ENTRY_POINT = UefiMain
 
 [Sources]
+	Source/Graphics.c
+	Source/Init.c
 	Source/UefiMain.c
 
 [Packages]

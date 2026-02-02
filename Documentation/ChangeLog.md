@@ -8,9 +8,9 @@
     commit：commit哈希  
     author(s)：没写就是我
     build号：build提交日期（yyyy-mm-dd）
+    修改标题  
     file：所修改的主要文件（以分号分隔，可多行，以项目根目录起始）  
 
-        修改类型：修改标题  
 
         对修改的说明
 
