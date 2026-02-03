@@ -1,8 +1,8 @@
 /**
  * @file Graphics.c
- * @version 0.0.0.2
+ * @version 0.0.0.3
  * @author LinhengXilan
- * @date 2026-2-3
+ * @date 2026-2-4
  */
 
 #include <Uefi.h>
@@ -10,16 +10,16 @@
 
 #include <Graphics.h>
 #include <Config.h>
+#include <Global.h>
 
-EFI_GRAPHICS_OUTPUT_PROTOCOL* graphicsOutputProtocol;
+EFI_GRAPHICS_OUTPUT_PROTOCOL* g_GraphicsOutputProtocol;
 
 EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
 	EFI_STATUS status = EFI_SUCCESS;
-	EFI_BOOT_SERVICES* efiBootServices = systemTable->BootServices;
 	UINTN noHandles = 0;
 	EFI_HANDLE* handles = nullptr;
-	status = efiBootServices->LocateHandleBuffer(ByProtocol, &gEfiGraphicsOutputProtocolGuid, nullptr, &noHandles, &handles);
+	status = g_EfiBootServices->LocateHandleBuffer(ByProtocol, &gEfiGraphicsOutputProtocolGuid, nullptr, &noHandles, &handles);
 #ifdef DEBUG
 	if (EFI_ERROR(status))
 	{
@@ -32,10 +32,10 @@ EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 	Print(L"No handles: %d\n", noHandles);
 #endif
 
-	status = efiBootServices->OpenProtocol(
+	status = g_EfiBootServices->OpenProtocol(
 		handles[0],
 		&gEfiGraphicsOutputProtocolGuid,
-		(void**)&graphicsOutputProtocol,
+		(void**)&g_GraphicsOutputProtocol,
 		imageHandle,
 		nullptr,
 		EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
@@ -55,9 +55,9 @@ EFI_STATUS QueryGraphicMode()
 	EFI_STATUS status = EFI_SUCCESS;
 	UINTN sizeOfInfo = 0;
 	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info;
-	for (UINTN i = 0; i < graphicsOutputProtocol->Mode->MaxMode; i++)
+	for (UINTN i = 0; i < g_GraphicsOutputProtocol->Mode->MaxMode; i++)
 	{
-		status = graphicsOutputProtocol->QueryMode(graphicsOutputProtocol, i ,&sizeOfInfo, &info);
+		status = g_GraphicsOutputProtocol->QueryMode(g_GraphicsOutputProtocol, i ,&sizeOfInfo, &info);
 #ifdef DEBUG
 		if (EFI_ERROR(status))
 		{
@@ -74,7 +74,7 @@ EFI_STATUS QueryGraphicMode()
 EFI_STATUS SetVideoMode(UINT32 mode)
 {
 	EFI_STATUS status = EFI_SUCCESS;
-	status = graphicsOutputProtocol->SetMode(graphicsOutputProtocol, mode);
+	status = g_GraphicsOutputProtocol->SetMode(g_GraphicsOutputProtocol, mode);
 #ifdef DEBUG
 	if (EFI_ERROR(status))
 	{

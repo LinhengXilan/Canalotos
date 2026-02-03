@@ -1,12 +1,14 @@
 /**
  * @file Graphics.h
- * @version 0.0.0.2
+ * @version 0.0.0.3
  * @author LinhengXilan
- * @date 2026-2-3
+ * @date 2026-2-4
  */
 
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
+
+extern EFI_GRAPHICS_OUTPUT_PROTOCOL* g_GraphicsOutputProtocol;
 
 EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable);
 EFI_STATUS QueryGraphicMode();

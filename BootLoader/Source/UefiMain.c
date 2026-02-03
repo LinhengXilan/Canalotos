@@ -1,8 +1,8 @@
 /**
  * @file UefiMain.c
- * @version 0.0.0.2
+ * @version 0.0.0.3
  * @author LinhengXilan
- * @date 2026-2-3
+ * @date 2026-2-4
  */
 
 #include <Uefi.h>
@@ -12,9 +12,13 @@
 #include <Init.h>
 #include <Graphics.h>
 
+EFI_BOOT_SERVICES* g_EfiBootServices;
+
 EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
 	Print(L"CanalotosBoot.\n");
+
+	g_EfiBootServices = systemTable->BootServices;
 	EFI_STATUS status = EFI_SUCCESS;
 	// 初始化
 	status = Init(imageHandle, systemTable);

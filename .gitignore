@@ -3,5 +3,3 @@ edk2
 Kernel
 qemu
 Build
-
-Makefile
