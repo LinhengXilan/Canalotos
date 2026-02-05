@@ -1,8 +1,8 @@
 /**
  * @file Graphics.h
- * @version 0.0.0.5
+ * @version 0.0.0.6
  * @author LinhengXilan
- * @date 2026-2-4
+ * @date 2026-2-6
  */
 
 #ifndef GRAPHICS_H
