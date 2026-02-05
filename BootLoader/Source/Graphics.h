@@ -8,6 +8,9 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <Uefi.h>
+#include <Library/UefiLib.h>
+
 extern EFI_GRAPHICS_OUTPUT_PROTOCOL* g_GraphicsOutputProtocol;
 
 EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable);

@@ -1,5 +1,6 @@
-edk2
 .idea
-Kernel
+.vscode
+edk2
 qemu
+reference
 Build

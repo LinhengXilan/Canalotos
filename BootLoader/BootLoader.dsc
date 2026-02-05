@@ -2,7 +2,7 @@
 	PLATFORM_NAME = BootLoader
 	PLATFORM_GUID = e407a021-4c2a-421a-9e6b-ee12436f30c1
 	PLATFORM_VERSION = 0.0.0.1
-	DSC_SPECIFICATION = 0x00010005
+	DSC_SPECIFICATION = 0x00010006
 	SUPPORTED_ARCHITECTURES = X64
 	BUILD_TARGETS = DEBUG|RELEASE
 
@@ -23,4 +23,4 @@
 	StackCheckFailureHookLib|MdePkg/Library/StackCheckFailureHookLibNull/StackCheckFailureHookLibNull.inf
 
 [Components]
-	BootLoader/BootLoader.inf
+	BootLoader.inf
