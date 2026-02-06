@@ -1,8 +1,8 @@
 /**
  * @file Graphics.c
- * @version 0.0.0.6
+ * @version 0.0.1.8
  * @author LinhengXilan
- * @date 2026-2-6
+ * @date 2026-2-7
  */
 
 #include <Uefi.h>
@@ -10,16 +10,17 @@
 
 #include <Graphics.h>
 #include <Config.h>
-#include <Global.h>
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL* g_GraphicsOutputProtocol = nullptr;
 
 EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
 	EFI_STATUS status = EFI_SUCCESS;
+	EFI_BOOT_SERVICES* efiBootServices = systemTable->BootServices;
+
 	UINTN noHandles = 0;
 	EFI_HANDLE* handles = nullptr;
-	status = g_EfiBootServices->LocateHandleBuffer(ByProtocol, &gEfiGraphicsOutputProtocolGuid, nullptr, &noHandles, &handles);
+	status = efiBootServices->LocateHandleBuffer(ByProtocol, &gEfiGraphicsOutputProtocolGuid, nullptr, &noHandles, &handles);
 	if (EFI_ERROR(status))
 	{
 #ifdef DEBUG
@@ -28,7 +29,7 @@ EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 		return status;
 	}
 
-	status = g_EfiBootServices->OpenProtocol(
+	status = efiBootServices->OpenProtocol(
 		handles[0],
 		&gEfiGraphicsOutputProtocolGuid,
 		(void**)&g_GraphicsOutputProtocol,

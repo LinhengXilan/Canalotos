@@ -10,6 +10,8 @@ make -C BaseTools
 cd ..
 make
 ```
-如果已正确配置edk2，则直接通过`make`编译  
+如果已正确配置edk2，则可直接通过`make`编译  
 
 编译结果位于Build文件夹内
+
+使用qemu运行时将drive路径为Build/Canalotos

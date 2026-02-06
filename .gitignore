@@ -4,3 +4,5 @@ edk2
 qemu
 reference
 Build
+
+setup.sh
