@@ -1,6 +1,6 @@
 /**
  * @file File.c
- * @version 0.0.0.6
+ * @version 0.0.0.7
  * @author LinhengXilan
  * @date 2026-2-6
  */
@@ -90,7 +90,7 @@ EFI_STATUS ReadFile(EFI_FILE_PROTOCOL* file, EFI_PHYSICAL_ADDRESS* address)
 	}
 
 	// 读取文件信息
-	status = file->GetInfo(file, gEfiFileInfoGuid, fileInfoSize, &fileInfo);
+	status = file->GetInfo(file, &gEfiFileInfoGuid, &fileInfoSize, &fileInfo);
 	if (EFI_ERROR(status))
 	{
 #ifdef DEBUG
