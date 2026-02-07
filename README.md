@@ -14,4 +14,10 @@ make
 
 编译结果位于Build文件夹内
 
-使用qemu运行时将drive路径为Build/Canalotos
+# 运行
+可在虚拟机和物理平台上运行
+
+	目前可在qemu和VMWare运行
+
+
+若在物理平台上运行需关闭安全启动

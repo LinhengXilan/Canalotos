@@ -1,15 +1,17 @@
 /**
  * @file Graphics.c
- * @version 0.0.1.8
+ * @version 0.0.1.9
  * @author LinhengXilan
- * @date 2026-2-7
+ * @date 2026-2-8
  */
 
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 
+#include <../Config.h>
 #include <Graphics.h>
-#include <Config.h>
+
+#include "Guid/FileInfo.h"
 
 EFI_GRAPHICS_OUTPUT_PROTOCOL* g_GraphicsOutputProtocol = nullptr;
 
@@ -44,14 +46,15 @@ EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 #endif
 		return status;
 	}
-	return EFI_SUCCESS;
+	return status;
 }
 
 EFI_STATUS QueryVideoMode()
 {
 	EFI_STATUS status = EFI_SUCCESS;
+
 	UINTN sizeOfInfo = 0;
-	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info;
+	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info = nullptr;
 	for (UINTN i = 0; i < g_GraphicsOutputProtocol->Mode->MaxMode; i++)
 	{
 		status = g_GraphicsOutputProtocol->QueryMode(g_GraphicsOutputProtocol, i ,&sizeOfInfo, &info);
@@ -63,7 +66,8 @@ EFI_STATUS QueryVideoMode()
 			return status;
 		}
 	}
-	return EFI_SUCCESS;
+
+	return status;
 }
 
 EFI_STATUS SetVideoMode(UINT32 mode)
@@ -77,5 +81,5 @@ EFI_STATUS SetVideoMode(UINT32 mode)
 #endif
 		return status;
 	}
-	return EFI_SUCCESS;
+	return status;
 }
