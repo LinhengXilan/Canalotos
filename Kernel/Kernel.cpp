@@ -1,15 +1,17 @@
 /**
  * @file Kernel.cpp
  * @author LinhengXilan
- * @version 0.0.0.2
- * @date 2026-2-8
+ * @version 0.0.0.3
+ * @date 2026-2-9
  */
 
+#include <Boot.h>
+
 extern "C" {
-	int Kernel(int a);
+	uint64_t Kernel(EFIData efiData);
 }
 
-int Kernel(int a)
+uint64_t Kernel(EFIData efiData)
 {
-	return a;
+	return efiData.Graphics.HorizontalResolution;
 }

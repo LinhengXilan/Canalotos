@@ -6,3 +6,5 @@ reference
 Build
 
 setup.sh
+qemu.sh
+CMakeLists.txt

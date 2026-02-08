@@ -1,3 +1,8 @@
+# @file Makefile
+# @author LinhengXilan
+# @version 0.0.0.3
+# @date 2026-2-9
+
 CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)Kernel/
 CURRENT_INTERMEDIATE_PATH := $(INTERMEDIATE_PATH)Kernel/
 RELATIVE_OUTPUT_PATH := Kernel/
@@ -33,4 +38,4 @@ $(BUILD): $(__OBJECT)
 
 %.o: %.cpp
 	@printf "\tC++\t%s\n" $(RELATIVE_OUTPUT_PATH)$@
-	@$(C++) $< $(C++_FLAGS) -I include -o $(CURRENT_INTERMEDIATE_PATH)$@
+	@$(C++) $< $(C++_FLAGS) -I Include -o $(CURRENT_INTERMEDIATE_PATH)$@

@@ -1,19 +1,20 @@
 /**
  * @file UefiMain.c
- * @version 0.0.1.9
+ * @version 0.0.1.10
  * @author LinhengXilan
- * @date 2026-2-8
+ * @date 2026-2-9
  */
 
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 
-#include <../Config.h>
+#include <Config.h>
 #include <Init.h>
 #include <Graphics.h>
 #include <File.h>
+#include <KernelData.h>
 
-typedef int(*Kernel)(int);
+typedef int(*Kernel)(EFI_DATA efiData);
 
 EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
@@ -25,15 +26,6 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 	{
 		return status;
 	}
-
-	// // 查询显示模式
-	// EFI_GRAPHICS_OUTPUT_MODE_INFORMATION graphicsMode;
-	// UINT32 graphicsIndex;
-	// status = QueryVideoMode(&graphicsMode, &graphicsIndex);
-	// if (EFI_ERROR(status))
-	// {
-	// 	return status;
-	// }
 
 	// 设置显示模式
 #ifdef VIRTUAL_MACHINE
@@ -60,9 +52,17 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 		return status;
 	}
 
+	EFI_DATA efiData;
+	status = GetEFIDataGraphics(&efiData.Graphics);
+	if (EFI_ERROR(status))
+	{
+		return status;
+	}
+
 	Kernel main = (Kernel)kernelEntryPoint;
-	int ret = main(666);
-	Print(L"ret from Kernel: %d", ret);
+	int ret = main(efiData);
+	Print(L"Address of Kernel: %x\n", kernelEntryPoint);
+	Print(L"ret from Kernel: 0x%lx\n", ret);
 
 	while (1)
 	{

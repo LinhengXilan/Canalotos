@@ -1,14 +1,14 @@
 /**
  * @file File.c
- * @version 0.0.1.9
+ * @version 0.0.1.10
  * @author LinhengXilan
- * @date 2026-2-8
+ * @date 2026-2-9
  */
 
 #include <Library/UefiLib.h>
 #include <Guid/FileInfo.h>
 
-#include <../Config.h>
+#include <Config.h>
 #include <File.h>
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* g_EfiSimpleFileSystemProtocol = nullptr;
