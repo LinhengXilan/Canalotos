@@ -6,13 +6,8 @@ ASM := nasm
 C++ := g++
 OBJCOPY := objcopy
 
-ASM_FLAGS := -f bin
-C++_FLAGS := -std=c++23 -m64 -c -nostdlib -fno-builtin -nostdinc -O2
-LDFLAGS = -b binary
-
 export ROOT_PATH OUTPUT_PATH INTERMEDIATE_PATH
 export ASM C++ OBJCOPY
-export ASM_FLAGS C++_FLAGS LDFLAGS
 
 .PHONY: all
 all: CreateDirectory Build

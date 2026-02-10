@@ -1,8 +1,8 @@
 /**
  * @file Include/Type.h
  * @author LinhengXilan
- * @version 0.0.0.3
- * @date 2026-2-9
+ * @version 0.0.0.4
+ * @date 2026-2-10
  */
 
 #ifndef __TYPE_H__
@@ -20,5 +20,11 @@ using uint64_t = unsigned long long;
 using size_t = uint64_t;
 using address_t = uint64_t;
 using offset_t = uint64_t;
+
+struct Buffer
+{
+	address_t Base;
+	size_t Size;
+};
 
 #endif

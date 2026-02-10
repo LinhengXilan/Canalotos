@@ -1,17 +1,24 @@
 # @file Makefile
 # @author LinhengXilan
-# @version 0.0.0.3
-# @date 2026-2-9
+# @version 0.0.0.4
+# @date 2026-2-10
 
-CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)Kernel/
+CURRENT_WORK_PATH := $(shell pwd)/
+CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)Canalotos/
 CURRENT_INTERMEDIATE_PATH := $(INTERMEDIATE_PATH)Kernel/
 RELATIVE_OUTPUT_PATH := Kernel/
 
-BUILD := Kernel.bin
-__OBJECT := Kernel.o
-_OBJECT := $(addprefix $(RELATIVE_OUTPUT_PATH), $(__OBJECT))
-OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(__OBJECT))
+ASM_FLAGS := -f bin
+C++_FLAGS := -std=c++23 -m64 -c -nostdlib -fno-builtin -nostdinc -O2 -fno-stack-protector
+LDFLAGS = -b binary
 
+export CURRENT_WORK_PATH
+export ASM_FLAGS C++_FLAGS LDFLAGS
+
+_OBJECT := Kernel/Kernel.a Graphics/Graphics.a
+OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(_OBJECT))
+
+SUBDIRS := Kernel Graphics
 
 .PHONY: all
 all: MakeDirectory Build
@@ -19,23 +26,13 @@ all: MakeDirectory Build
 .PHONY: MakeDirectory
 MakeDirectory:
 ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)),)
-	mkdir $(CURRENT_OUTPUT_PATH)
-endif
-ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)),)
-	mkdir $(CURRENT_INTERMEDIATE_PATH)
+	@mkdir $(CURRENT_OUTPUT_PATH)
 endif
 
 .PHONY: Build
-Build: $(BUILD)
+Build: Subdir
+	@printf "\tLD\t%s\n" Kernel.bin
+	@$(LD) $(OBJECT) $(LD_FLAGS) -T Kernel.lds -o $(CURRENT_OUTPUT_PATH)Kernel.bin
 
-$(BUILD): $(__OBJECT)
-	@printf "\tLD\t%s\n" $(_OBJECT)
-	@$(LD) $(OBJECT) $(LD_FLAGS) -T Kernel.lds -o $(CURRENT_OUTPUT_PATH)$@
-
-%.: %.asm
-	@printf "\tASM\t%s\n" $(RELATIVE_OUTPUT_PATH)$@
-	@$(ASM) $< $(ASM_FLAGS) -o $(CURRENT_OUTPUT_PATH)$@
-
-%.o: %.cpp
-	@printf "\tC++\t%s\n" $(RELATIVE_OUTPUT_PATH)$@
-	@$(C++) $< $(C++_FLAGS) -I Include -o $(CURRENT_INTERMEDIATE_PATH)$@
+Subdir: $(SUBDIRS)
+	@set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i; done

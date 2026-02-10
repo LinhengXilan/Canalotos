@@ -1,8 +1,8 @@
 /**
  * @file UefiMain.c
- * @version 0.0.1.10
+ * @version 0.0.1.11
  * @author LinhengXilan
- * @date 2026-2-9
+ * @date 2026-2-10
  */
 
 #include <Uefi.h>
@@ -14,7 +14,7 @@
 #include <File.h>
 #include <KernelData.h>
 
-typedef int(*Kernel)(EFI_DATA efiData);
+typedef int(*Kernel)(const EFI_DATA* efiData);
 
 EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
@@ -39,7 +39,7 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 	}
 
 	EFI_FILE_PROTOCOL* kernel = nullptr;
-	status = GetFileHandle(L"Kernel\\Kernel.bin", &kernel);
+	status = GetFileHandle(L"Canalotos\\Kernel.bin", &kernel);
 	if (EFI_ERROR(status))
 	{
 		return status;
@@ -60,13 +60,8 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 	}
 
 	Kernel main = (Kernel)kernelEntryPoint;
-	int ret = main(efiData);
-	Print(L"Address of Kernel: %x\n", kernelEntryPoint);
-	Print(L"ret from Kernel: 0x%lx\n", ret);
 
-	while (1)
-	{
+	main(&efiData);
 
-	}
 	return status;
 }
