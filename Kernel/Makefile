@@ -1,7 +1,7 @@
 # @file Makefile
 # @author LinhengXilan
-# @version 0.0.0.4
-# @date 2026-2-10
+# @version 0.0.0.6
+# @date 2026-2-13
 
 CURRENT_WORK_PATH := $(shell pwd)/
 CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)Canalotos/
@@ -15,10 +15,10 @@ LDFLAGS = -b binary
 export CURRENT_WORK_PATH
 export ASM_FLAGS C++_FLAGS LDFLAGS
 
-_OBJECT := Kernel/Kernel.a Graphics/Graphics.a Shell/Shell.a
+_OBJECT := Kernel/Kernel.a Graphics/Graphics.a Shell/Shell.a Lib/Lib.a
 OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(_OBJECT))
 
-SUBDIRS := Kernel Graphics Shell
+SUBDIRS := Kernel Graphics Shell Lib
 
 .PHONY: all
 all: MakeDirectory Build

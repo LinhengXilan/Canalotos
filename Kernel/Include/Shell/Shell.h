@@ -1,8 +1,8 @@
 /**
  * @file Include/Shell/Shell.h
  * @author LinhengXilan
- * @version 0.0.0.3
- * @date 2026-2-9
+ * @version 0.0.0.6
+ * @date 2026-2-13
  */
 
 #ifndef __SHELL_SHELL_H__
@@ -24,11 +24,17 @@ public:
 
 public:
 	/**
-	 * @param c ascii字符
+	 * @param ch ascii字符
 	 *
 	 * @brief 打印一个ascii字符
 	 */
-	void PutChar(char c);
+	void PutChar(char ch);
+	/**
+	 * @param string const char* | 字符串指针
+	 *
+	 * @note 请保证字符串大小小于65535
+	 */
+	void PutString(const char* string);
 
 private:
 	void Write();
