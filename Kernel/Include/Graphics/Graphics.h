@@ -33,7 +33,7 @@ public:
 	 * @param color uint32_t | 颜色
 	 * @brief 绘制坐标处1像素的颜色
 	 */
-	void DrawPixel(uint16_t x, uint16_t y, uint32_t color);
+	void WritePixel(uint16_t x, uint16_t y, uint32_t color);
 
 private:
 	Buffer m_Buffer;

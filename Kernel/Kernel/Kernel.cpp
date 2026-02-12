@@ -7,6 +7,7 @@
 
 #include <Boot.h>
 #include <Graphics/Graphics.h>
+#include <Shell/Shell.h>
 
 extern "C" {
 	uint64_t Kernel(const EFIData* efiData);
@@ -15,14 +16,14 @@ extern "C" {
 uint64_t Kernel(const EFIData* efiData)
 {
 	Graphics graphics{efiData->Graphics};
+	Shell shell{&graphics, 0xFF0D1117, 0xFFFFCCDD};
+	shell.PutChar('K');
+	shell.PutChar('e');
+	shell.PutChar('r');
+	shell.PutChar('n');
+	shell.PutChar('e');
+	shell.PutChar('l');
 
-	for (uint16_t i = 0; i < 100; i++)
-	{
-		for (uint16_t j = 0; j < 100; j++)
-		{
-			graphics.DrawPixel(i, j, 0xFFFFCCEE);
-		}
-	}
 
 	while (true)
 	{

@@ -20,7 +20,7 @@ Resolution Graphics::GetResolution() const
 	return m_Resolution;
 }
 
-void Graphics::DrawPixel(uint16_t x, uint16_t y, uint32_t color)
+void Graphics::WritePixel(uint16_t x, uint16_t y, uint32_t color)
 {
 	*reinterpret_cast<uint32_t*>(m_Buffer.Base + (m_Resolution.Width * y + x) * 4) = color;
 }

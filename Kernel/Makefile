@@ -15,10 +15,10 @@ LDFLAGS = -b binary
 export CURRENT_WORK_PATH
 export ASM_FLAGS C++_FLAGS LDFLAGS
 
-_OBJECT := Kernel/Kernel.a Graphics/Graphics.a
+_OBJECT := Kernel/Kernel.a Graphics/Graphics.a Shell/Shell.a
 OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(_OBJECT))
 
-SUBDIRS := Kernel Graphics
+SUBDIRS := Kernel Graphics Shell
 
 .PHONY: all
 all: MakeDirectory Build
