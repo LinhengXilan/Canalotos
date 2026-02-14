@@ -10,7 +10,6 @@ RELATIVE_OUTPUT_PATH := Kernel/
 
 ASM_FLAGS := -f bin
 C++_FLAGS := -std=c++23 -m64 -c -nostdlib -fno-builtin -nostdinc -O2 -fno-stack-protector
-LDFLAGS = -b binary
 
 export CURRENT_WORK_PATH
 export ASM_FLAGS C++_FLAGS LDFLAGS

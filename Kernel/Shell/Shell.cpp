@@ -1,13 +1,14 @@
 /**
  * @file Shell/Shell.cpp
  * @author LinhengXilan
- * @version 0.0.0.6
- * @date 2026-2-13
+ * @version 0.0.0.7
+ * @date 2026-2-14
  */
 
 #include <Shell/Shell.h>
 #include <Shell/Font.h>
 #include <Lib/CString.h>
+#include <Lib/Print.h>
 
 Shell::Shell(Graphics* graphics)
 	: m_Graphics(graphics)
@@ -61,28 +62,33 @@ void Shell::Write()
 	for (uint16_t i = 0; i < m_BufferSize; i++)
 	{
 		uint8_t* ascii = Font[m_Buffer[i]];
-		if (m_Buffer[i] < 32 || m_Buffer[i] >= 127)
+		switch (m_Buffer[i])
 		{
+		case 32 ... 126:
+		{
+			uint16_t y = printableCount / m_PrintablePerRow * 16 + 4;
+			for (uint8_t j = 0; j < 16; j++)
+			{
+				uint16_t x = printableCount % m_PrintablePerRow * 8 + 4;
+				for (uint8_t k = 8; k > 0; k--)
+				{
+					if (ascii[j] & 1 << k)
+					{
+						m_Graphics->WritePixel(x, y, m_TextColor);
+					}
+					else
+					{
+						m_Graphics->WritePixel(x, y, m_BackgroundColor);
+					}
+					x += 1;
+				}
+				y += 1;
+			}
+			printableCount++;
 			break;
 		}
-		uint16_t y = printableCount / m_PrintablePerRow * 16 + 4;
-		for (uint8_t j = 0; j < 16; j++)
-		{
-			uint16_t x = printableCount % m_PrintablePerRow * 8 + 4;
-			for (uint8_t k = 8; k > 0; k--)
-			{
-				if (ascii[j] & 1 << k)
-				{
-					m_Graphics->WritePixel(x, y, m_TextColor);
-				}
-				else
-				{
-					m_Graphics->WritePixel(x, y, m_BackgroundColor);
-				}
-				x += 1;
-			}
-			y += 1;
+		default:
+			break;
 		}
-		printableCount++;
 	}
 }
