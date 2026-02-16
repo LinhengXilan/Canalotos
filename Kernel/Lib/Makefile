@@ -6,7 +6,7 @@
 CURRENT_INTERMEDIATE_PATH := $(INTERMEDIATE_PATH)Kernel/Lib/
 RELATIVE_OUTPUT_PATH := Lib/
 
-__OBJECT := CString.o Print.o
+__OBJECT := String.o Print.o
 _OBJECT := $(addprefix $(RELATIVE_OUTPUT_PATH), $(__OBJECT))
 OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(__OBJECT))
 

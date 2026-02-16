@@ -1,8 +1,8 @@
 /**
- * @file Boot.h
- * @version 0.0.1.10
+ * @file KernelData.h
+ * @version 0.0.2.12
  * @author LinhengXilan
- * @date 2026-2-9
+ * @date 2026-2-16
  *
  * @brief 用于定义向内核传递的数据
  */
@@ -23,7 +23,17 @@ typedef struct
 
 typedef struct
 {
+	UINTN Size;
+	EFI_MEMORY_DESCRIPTOR* Buffer;
+	UINTN MapKey;
+	UINTN DescriptorSize;
+	UINT32 DescriptorVersion;
+}EFI_DATA_MEMORY;
+
+typedef struct
+{
 	EFI_DATA_GRAPHICS Graphics;
+	EFI_DATA_MEMORY Memory;
 }EFI_DATA;
 
 #endif

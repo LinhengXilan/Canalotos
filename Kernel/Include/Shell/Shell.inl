@@ -11,9 +11,10 @@
 #include <Shell/Shell.h>
 
 template<typename... Args>
-	void Shell::Print(const char* string, Args... args)
+void Shell::Print(const char* string, Args... args)
 {
-	Lib::printf(m_Buffer + m_Index, string, args...);
+	uint8_t length = Lib::printf(m_Buffer + m_Index, string, args...);
+	m_Index += length;
 	Write();
 }
 

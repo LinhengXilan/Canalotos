@@ -16,7 +16,7 @@
 class Shell
 {
 public:
-	Shell(Graphics* graphics);
+	explicit Shell(Graphics* graphics);
 	Shell(Graphics* graphics, uint32_t backgroundColor, uint32_t textColor);
 	~Shell() = default;
 
@@ -50,6 +50,8 @@ private:
 	uint16_t m_Index = 0;
 	uint8_t m_PrintablePerRow;
 	uint8_t m_PrintablePerColumn;
+	uint8_t m_CursorX = 0;
+	uint8_t m_CursorY = 0;
 	uint32_t m_BackgroundColor = 0x00000000;
 	uint32_t m_TextColor = 0xFFFFFFFF;
 };

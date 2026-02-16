@@ -11,6 +11,7 @@
 	Source/Graphics.c
 	Source/Init.c
 	Source/UefiMain.c
+	Source/Memory.c
 
 [Packages]
 	MdePkg/MdePkg.dec

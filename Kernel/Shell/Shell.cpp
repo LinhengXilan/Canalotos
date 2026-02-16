@@ -7,7 +7,7 @@
 
 #include <Shell/Shell.h>
 #include <Shell/Font.h>
-#include <Lib/CString.h>
+#include <Lib/String.h>
 #include <Lib/Print.h>
 
 Shell::Shell(Graphics* graphics)
@@ -16,10 +16,12 @@ Shell::Shell(Graphics* graphics)
 	m_PrintablePerRow = graphics->GetResolution().Width - 2 / 8;
 	m_PrintablePerColumn = graphics->GetResolution().Height - 2 / 16;
 	m_BufferSize = m_PrintablePerRow * m_PrintablePerColumn;
+
 	m_Graphics->WriteBlock(0, 0, m_Graphics->GetResolution().Width, 1, 0xFFFFFFFF);
 	m_Graphics->WriteBlock(0, m_Graphics->GetResolution().Height - 1, m_Graphics->GetResolution().Width, 1, 0xFFFFFFFF);
 	m_Graphics->WriteBlock(0, 0, 1, m_Graphics->GetResolution().Height, 0xFFFFFFFF);
 	m_Graphics->WriteBlock(m_Graphics->GetResolution().Width - 1, 0, 1, m_Graphics->GetResolution().Height, 0xFFFFFFFF);
+	Write();
 }
 
 Shell::Shell(Graphics* graphics, uint32_t backgroundColor, uint32_t textColor)
@@ -27,6 +29,7 @@ Shell::Shell(Graphics* graphics, uint32_t backgroundColor, uint32_t textColor)
 {
 	m_BackgroundColor = backgroundColor;
 	m_TextColor = textColor;
+	Write();
 }
 
 void Shell::SetBackgroundColor(uint32_t color)
@@ -48,7 +51,7 @@ void Shell::PutChar(char ch)
 
 void Shell::PutString(const char* string)
 {
-	for (uint16_t i = 0; i < StrLen(string); i++)
+	for (uint16_t i = 0; i < Lib::StrLen(string); i++)
 	{
 		m_Buffer[m_Index] = string[i];
 		m_Index++;
@@ -58,18 +61,31 @@ void Shell::PutString(const char* string)
 
 void Shell::Write()
 {
-	uint16_t printableCount = 0;
+	m_CursorX = 0;
+	m_CursorY = 0;
 	for (uint16_t i = 0; i < m_BufferSize; i++)
 	{
 		uint8_t* ascii = Font[m_Buffer[i]];
+		if (m_CursorX >= m_PrintablePerRow)
+		{
+			m_CursorX = 0;
+			m_CursorY++;
+		}
 		switch (m_Buffer[i])
 		{
+		case '\n':
+			m_CursorX = 0;
+			m_CursorY++;
+			break;
+		case '\t':
+			m_CursorX = m_CursorX + 4 & 0b11111100;
+			break;
 		case 32 ... 126:
 		{
-			uint16_t y = printableCount / m_PrintablePerRow * 16 + 4;
+			uint16_t y = m_CursorY * 16 + 4;
 			for (uint8_t j = 0; j < 16; j++)
 			{
-				uint16_t x = printableCount % m_PrintablePerRow * 8 + 4;
+				uint16_t x = m_CursorX * 8 + 4;
 				for (uint8_t k = 8; k > 0; k--)
 				{
 					if (ascii[j] & 1 << k)
@@ -80,11 +96,11 @@ void Shell::Write()
 					{
 						m_Graphics->WritePixel(x, y, m_BackgroundColor);
 					}
-					x += 1;
+					x++;
 				}
-				y += 1;
+				y++;
 			}
-			printableCount++;
+			m_CursorX++;
 			break;
 		}
 		default:

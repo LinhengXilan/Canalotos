@@ -1,8 +1,8 @@
 /**
  * @file UefiMain.c
- * @version 0.0.1.11
+ * @version 0.0.2.12
  * @author LinhengXilan
- * @date 2026-2-10
+ * @date 2026-2-16
  */
 
 #include <Uefi.h>
@@ -13,12 +13,14 @@
 #include <Graphics.h>
 #include <File.h>
 #include <KernelData.h>
+#include <Memory.h>
 
 typedef int(*Kernel)(const EFI_DATA* efiData);
 
 EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 {
 	EFI_STATUS status = EFI_SUCCESS;
+	EFI_BOOT_SERVICES* bootServices = systemTable->BootServices;
 
 	// 初始化
 	status = Init(imageHandle, systemTable);
@@ -57,6 +59,20 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 	if (EFI_ERROR(status))
 	{
 		return status;
+	}
+
+	status = GetEFIDataMemory(systemTable, &efiData.Memory);
+	if (EFI_ERROR(status))
+	{
+		return status;
+	}
+
+	status = bootServices->ExitBootServices(imageHandle, efiData.Memory.MapKey);
+	if (EFI_ERROR(status))
+	{
+#ifdef DEBUG
+		Print(L"[UEFI]Error %d: Failed to ExitBootServices\n", status);
+#endif
 	}
 
 	Kernel main = (Kernel)kernelEntryPoint;

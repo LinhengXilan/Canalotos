@@ -9,7 +9,7 @@
 
 namespace Lib
 {
-	void printf(char* buffer, const char* string, ...)
+	uint8_t printf(char* buffer, const char* string, ...)
 	{
 		char lbuffer[256];
 		va_list args;
@@ -20,6 +20,7 @@ namespace Lib
 		{
 			buffer[i] = lbuffer[i];
 		}
+		return length;
 	}
 
 	uint8_t format(char* buffer, const char* format, va_list args)

@@ -13,7 +13,7 @@
 
 namespace Lib
 {
-	void printf(char* buffer, const char* string, ...);
+	uint8_t printf(char* buffer, const char* string, ...);
 
 	uint8_t format(char* buffer, const char* format, va_list args);
 	char* itoa(char* buffer, uint64_t number, uint8_t base, uint8_t precision);

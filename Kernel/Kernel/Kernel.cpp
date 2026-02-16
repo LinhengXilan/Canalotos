@@ -17,8 +17,14 @@ uint64_t Kernel(const EFIData* efiData)
 {
 	Graphics graphics{efiData->Graphics};
 	Shell shell{&graphics, 0xFF0D1117, 0xFFFFCCDD};
-	shell.PutString("Kernel");
-	shell.Print(": %d", 10);
+	shell.Print("MemoryMapKey: %d\n", efiData->Memory.MapKey);
+
+	EFIMemoryMap* memoryMap = efiData->Memory.MemoryMap;
+	shell.Print("Type\tVirtualStart\tNumberOfPages\tAttribute\n");
+	for (int i = 0; i < 100; ++i, ++memoryMap)
+	{
+		shell.Print("0x%x\t\t0x%8lx\t\t0x%8lx\t\t0x%lx\n", memoryMap->Type, memoryMap->PhysicalStart, memoryMap->NumberOfPages, memoryMap->Attribute);
+	}
 
 	while (true)
 	{
