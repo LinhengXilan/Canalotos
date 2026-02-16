@@ -1,8 +1,8 @@
 /**
  * @file Include/Lib/String.h
  * @author LinhengXilan
- * @version 0.0.0.6
- * @date 2026-2-13
+ * @version 0.0.1.8
+ * @date 2026-2-16
  */
 
 #ifndef __LIB_STRING_H__

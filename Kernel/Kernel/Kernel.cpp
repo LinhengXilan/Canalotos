@@ -1,8 +1,8 @@
 /**
  * @file Kernel/Kernel.cpp
  * @author LinhengXilan
- * @version 0.0.0.7
- * @date 2026-2-14
+ * @version 0.0.1.8
+ * @date 2026-2-16
  */
 
 #include <Boot.h>

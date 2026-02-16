@@ -1,8 +1,8 @@
 /**
  * @file Lib/String.cpp
  * @author LinhengXilan
- * @version 0.0.0.6
- * @date 2026-2-13
+ * @version 0.0.1.8
+ * @date 2026-2-16
  */
 
 #include <Lib/String.h>
