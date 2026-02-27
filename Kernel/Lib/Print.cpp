@@ -1,8 +1,8 @@
 /**
  * @file Lib/Print.cpp
  * @author LinhengXilan
- * @version 0.0.1.8
- * @date 2026-2-16
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 #include <Lib/Print.h>
@@ -28,7 +28,7 @@ namespace Lib
 		char* l_Buffer = buffer;
 		bool flagFormat = false;
 		bool flagLong = false;
-		uint8_t precision = 0;
+		uint8_t precision = 1;
 		while (*format != '\0')
 		{
 			if (*format == '%' && flagFormat == false)
@@ -41,7 +41,7 @@ namespace Lib
 			{
 				switch (*format)
 				{
-				case '0'...'9':
+				case '1'...'9':
 				    precision *= 10;
 					precision += *format - '0';
 					break;
@@ -56,7 +56,7 @@ namespace Lib
 					}
 					flagFormat = false;
 					flagLong = false;
-					precision = 0;
+					precision = 1;
 					break;
 				case 'c':
 					flagLong = false;
@@ -91,7 +91,7 @@ namespace Lib
 					}
 					flagFormat = false;
 					flagLong = false;
-					precision = 0;
+					precision = 1;
 					break;
 				case 'l':
 					flagLong = true;
@@ -107,7 +107,7 @@ namespace Lib
 					}
 					flagFormat = false;
 					flagLong = false;
-					precision = 0;
+					precision = 1;
 					break;
 				case 's':
 					{
@@ -131,7 +131,7 @@ namespace Lib
 					}
 					flagFormat = false;
 					flagLong = false;
-					precision = 0;
+					precision = 1;
 					break;
 				case 'x':
 					if (flagLong == true)
@@ -144,7 +144,7 @@ namespace Lib
 					}
 					flagFormat = false;
 					flagLong = false;
-					precision = 0;
+					precision = 1;
 					break;
 				case '%':
 				default:

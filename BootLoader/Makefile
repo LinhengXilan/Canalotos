@@ -1,7 +1,7 @@
 # @file Makefile
-# @version 0.0.1.10
 # @author LinhengXilan
-# @date 2026-2-9
+# @version 0.0.2.13
+# @date 2026-2-28
 
 CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)EFI/Boot/
 var := aa
@@ -23,7 +23,7 @@ Build:
 	@export WORKSPACE=$(ROOT_PATH)edk2
 	@export EDK_TOOLS_PATH=$(ROOT_PATH)edk2/BaseTools
 	@export CONF_PATH=$(ROOT_PATH)edk2/Conf
-	@cp -r . $(ROOT_PATH)edk2/
+	@cp -r . $(ROOT_PATH)edk2/BootLoader
 	@printf "\tEFI\tBootx64.efi\n"
 	@cd ../edk2 && build -p BootLoader/BootLoader.dsc -a X64 -t GCC -b RELEASE
-	@cp ../edk2/Build/BootLoader/RELEASE_GCC/X64/bootx64.efi $(CURRENT_OUTPUT_PATH)
+	@cp ../edk2/Build/BootLoader/RELEASE_GCC/X64/Bootx64.efi $(CURRENT_OUTPUT_PATH)

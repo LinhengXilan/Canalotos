@@ -20,3 +20,5 @@ make
 	实测可在qemu和VMWare运行
 
 若在物理平台上运行需关闭安全启动
+
+	需要将BootLoader/Source/Config.h中的VIRTUAL_MACHINE宏注释掉

@@ -1,8 +1,8 @@
 /**
  * @file Kernel.lds
  * @author LinhengXilan
- * @version 0.0.0.2
- * @date 2026-2-8
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 OUTPUT_FORMAT("binary", "binary", "binary")
@@ -13,16 +13,16 @@ SECTIONS
 	. = 0;
 	.text :
 	{
-		_text = .;
+		_Text = .;
 		*(.text)
-		_etext = .;
+		_EndText = .;
 	}
 	. = ALIGN(8);
 	.data :
 	{
-		_data = .;
+		_Data = .;
 		*(.data)
-		_edata = .;
+		_EndData = .;
 	}
-	_end = .;
+	_End = .;
 }

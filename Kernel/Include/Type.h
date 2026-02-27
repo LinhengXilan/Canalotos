@@ -1,25 +1,25 @@
 /**
  * @file Include/Type.h
  * @author LinhengXilan
- * @version 0.0.0.4
- * @date 2026-2-10
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 #ifndef __TYPE_H__
 #define __TYPE_H__
 
-using int8_t = char;
-using int16_t = short;
-using int32_t = int;
-using int64_t = long long;
-using uint8_t = unsigned char;
-using uint16_t = unsigned short;
-using uint32_t = unsigned int;
-using uint64_t = unsigned long long;
+typedef char int8_t;
+typedef short int16_t;
+typedef int int32_t;
+typedef long long int64_t;
+typedef unsigned char uint8_t;
+typedef unsigned short uint16_t;
+typedef unsigned int uint32_t;
+typedef unsigned long long uint64_t;
 
-using size_t = uint64_t;
-using address_t = uint64_t;
-using offset_t = uint64_t;
+typedef uint64_t size_t;
+typedef uint64_t offset_t;
+typedef uint64_t address_t;
 
 struct Buffer
 {

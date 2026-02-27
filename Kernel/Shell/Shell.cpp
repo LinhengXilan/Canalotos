@@ -1,20 +1,19 @@
 /**
  * @file Shell/Shell.cpp
  * @author LinhengXilan
- * @version 0.0.1.8
- * @date 2026-2-16
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 #include <Shell/Shell.h>
 #include <Shell/Font.h>
 #include <Lib/String.h>
-#include <Lib/Print.h>
 
 Shell::Shell(Graphics* graphics)
 	: m_Graphics(graphics)
 {
-	m_PrintablePerRow = graphics->GetResolution().Width - 2 / 8;
-	m_PrintablePerColumn = graphics->GetResolution().Height - 2 / 16;
+	m_PrintablePerRow = (graphics->GetResolution().Width - 2) / 8;
+	m_PrintablePerColumn = (graphics->GetResolution().Height - 2) / 16;
 	m_BufferSize = m_PrintablePerRow * m_PrintablePerColumn;
 
 	m_Graphics->WriteBlock(0, 0, m_Graphics->GetResolution().Width, 1, 0xFFFFFFFF);

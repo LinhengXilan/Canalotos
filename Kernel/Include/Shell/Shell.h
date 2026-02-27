@@ -1,8 +1,8 @@
 /**
  * @file Include/Shell/Shell.h
  * @author LinhengXilan
- * @version 0.0.1.8
- * @date 2026-2-16
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 #ifndef __SHELL_SHELL_H__
@@ -10,8 +10,6 @@
 
 #include <Type.h>
 #include <Graphics/Graphics.h>
-#include <stdarg.h>
-#include <Lib/Print.h>
 
 class Shell
 {
@@ -41,7 +39,6 @@ public:
 	void Print(const char* string, Args... args);
 private:
 	void Write();
-
 
 private:
 	Graphics* m_Graphics;

@@ -1,14 +1,14 @@
 /**
  * @file Include/Shell/Shell.inl
  * @author LinhengXilan
- * @version 0.0.1.8
- * @date 2026-2-16
+ * @version 0.0.1.9
+ * @date 2026-2-28
  */
 
 #ifndef __SHELL_SHELL_INL_
 #define __SHELL_SHELL_INL_
 
-#include <Shell/Shell.h>
+#include <Lib/Print.h>
 
 template<typename... Args>
 void Shell::Print(const char* string, Args... args)
