@@ -3,8 +3,9 @@
 edk2
 qemu
 reference
-Build
+build
 
+.clang-format
 setup.sh
 qemu.sh
 CMakeLists.txt

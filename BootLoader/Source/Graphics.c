@@ -1,17 +1,15 @@
 /**
  * @file Graphics.c
- * @version 0.0.1.10
  * @author LinhengXilan
- * @date 2026-2-9
+ * @version 0.0.2.13
+ * @date 2026-3-20
  */
 
 #include <Uefi.h>
 #include <Library/UefiLib.h>
 
-#include <Config.h>
 #include <Graphics.h>
-
-#include "Guid/FileInfo.h"
+#include <Error.h>
 
 UINT32 g_GraphicsMode = 0;
 
@@ -25,13 +23,7 @@ EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 	UINTN noHandles = 0;
 	EFI_HANDLE* handles = nullptr;
 	status = efiBootServices->LocateHandleBuffer(ByProtocol, &gEfiGraphicsOutputProtocolGuid, nullptr, &noHandles, &handles);
-	if (EFI_ERROR(status))
-	{
-#ifdef DEBUG
-		Print(L"[Graphics]Error %d: Failed to Locate EfiGraphicsOutputProtocol!\n", status);
-#endif
-		return status;
-	}
+	CANALOTOS_ERROR_MESSAGE(status, "[Graphics]", "Failed to Locate EfiGraphicsOutputProtocol");
 
 	status = efiBootServices->OpenProtocol(
 		handles[0],
@@ -41,13 +33,7 @@ EFI_STATUS InitGraphics(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable)
 		nullptr,
 		EFI_OPEN_PROTOCOL_BY_HANDLE_PROTOCOL
 	);
-	if (EFI_ERROR(status))
-	{
-#ifdef DEBUG
-		Print(L"[Graphics]Error %d: Failed to Open EfiGraphicsOutputProtocol!\n", status);
-#endif
-		return status;
-	}
+	CANALOTOS_ERROR_MESSAGE(status, "[Graphics]", "Failed to Open EfiGraphicsOutputProtocol");
 
 	return status;
 }
@@ -61,13 +47,7 @@ EFI_STATUS QueryVideoMode()
 	for (UINTN i = 0; i < g_GraphicsOutputProtocol->Mode->MaxMode; i++)
 	{
 		status = g_GraphicsOutputProtocol->QueryMode(g_GraphicsOutputProtocol, i ,&infoSize, &info);
-		if (EFI_ERROR(status))
-		{
-#ifdef DEBUG
-			Print(L"[Graphics]Error %d: Failed to query video mode!\n", status);
-#endif
-			return status;
-		}
+		CANALOTOS_ERROR_MESSAGE(status, "[Graphics]", "Failed to query video mode");
 	}
 
 	return status;
@@ -77,13 +57,7 @@ EFI_STATUS SetVideoMode(UINT32 mode)
 {
 	EFI_STATUS status = EFI_SUCCESS;
 	status = g_GraphicsOutputProtocol->SetMode(g_GraphicsOutputProtocol, mode);
-	if (EFI_ERROR(status))
-	{
-#ifdef DEBUG
-		Print(L"[Graphics]Error %d: Failed to set video mode!\n", status);
-#endif
-		return status;
-	}
+	CANALOTOS_ERROR_MESSAGE(status, "[Graphics]", "Failed to set video mode");
 
 	g_GraphicsMode = mode;
 
@@ -96,13 +70,7 @@ EFI_STATUS GetGraphicsModeInfo(EFI_GRAPHICS_OUTPUT_MODE_INFORMATION** info)
 
 	UINTN infoSize = 0;
 	status = g_GraphicsOutputProtocol->QueryMode(g_GraphicsOutputProtocol, g_GraphicsMode, &infoSize, info);
-	if (EFI_ERROR(status))
-	{
-#ifdef DEBUG
-		Print(L"[Graphics]Error %d: GetGraphicsModeInfo!\n", status);
-#endif
-		return status;
-	}
+	CANALOTOS_ERROR_MESSAGE(status, "[Graphics]", "Failed to GetGraphicsModeInfo");
 
 	return status;
 }
@@ -116,10 +84,8 @@ EFI_STATUS GetEFIDataGraphics(EFI_DATA_GRAPHICS* efiDataGraphics)
 
 	EFI_GRAPHICS_OUTPUT_MODE_INFORMATION* info = nullptr;
 	status = GetGraphicsModeInfo(&info);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
+
 	efiDataGraphics->HorizontalResolution = info->HorizontalResolution;
 	efiDataGraphics->VerticalResolution = info->VerticalResolution;
 

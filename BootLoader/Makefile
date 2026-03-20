@@ -1,23 +1,17 @@
 # @file Makefile
 # @author LinhengXilan
 # @version 0.0.2.13
-# @date 2026-2-28
+# @date 2026-3-20
 
 CURRENT_OUTPUT_PATH := $(OUTPUT_PATH)EFI/Boot/
-var := aa
 
 .PHONY: all
-
 all: CreateDirectory Build
 
-.PHONY: CreateDirectory
-
 CreateDirectory:
-ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)),)
+ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)), )
 	@mkdir -p $(CURRENT_OUTPUT_PATH)
 endif
-
-.PHONY: Build
 
 Build:
 	@export WORKSPACE=$(ROOT_PATH)edk2

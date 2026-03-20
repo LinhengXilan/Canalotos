@@ -1,8 +1,8 @@
 /**
  * @file UefiMain.c
- * @version 0.0.2.12
  * @author LinhengXilan
- * @date 2026-2-16
+ * @version 0.0.2.13
+ * @date 2026-3-20
  */
 
 #include <Uefi.h>
@@ -14,6 +14,7 @@
 #include <File.h>
 #include <KernelData.h>
 #include <Memory.h>
+#include <Error.h>
 
 typedef int(*Kernel)(const EFI_DATA* efiData);
 
@@ -24,59 +25,35 @@ EFI_STATUS EFIAPI UefiMain(EFI_HANDLE imageHandle, EFI_SYSTEM_TABLE* systemTable
 
 	// 初始化
 	status = Init(imageHandle, systemTable);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
 
 	// 设置显示模式
-#ifdef VIRTUAL_MACHINE
+#ifdef CANALOTOS_VIRTUAL_MACHINE
 	status = SetVideoMode(22);
 #else
 	status = SetVideoMode(0);
 #endif
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
 
 	EFI_FILE_PROTOCOL* kernel = nullptr;
-	status = GetFileHandle(L"Canalotos\\Kernel.bin", &kernel);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	status = GetFileHandle(L"Canalotos\\Kernel", &kernel);
+	CANALOTOS_ERROR(status);
 
 	EFI_PHYSICAL_ADDRESS kernelEntryPoint;
 	status = ReadFile(systemTable, kernel, &kernelEntryPoint);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
 
 	EFI_DATA efiData;
 	status = GetEFIDataGraphics(&efiData.Graphics);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
 
 	status = GetEFIDataMemory(systemTable, &efiData.Memory);
-	if (EFI_ERROR(status))
-	{
-		return status;
-	}
+	CANALOTOS_ERROR(status);
 
 	status = bootServices->ExitBootServices(imageHandle, efiData.Memory.MapKey);
-	if (EFI_ERROR(status))
-	{
-#ifdef DEBUG
-		Print(L"[UEFI]Error %d: Failed to ExitBootServices\n", status);
-#endif
-	}
+	CANALOTOS_ERROR_MESSAGE(status, "[UEFI]", "Failed to ExitBootServices");
 
 	Kernel main = (Kernel)kernelEntryPoint;
-
 	main(&efiData);
 
 	return status;
