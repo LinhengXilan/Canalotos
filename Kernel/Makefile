@@ -9,8 +9,9 @@ CURRENT_INTERMEDIATE_PATH := $(INTERMEDIATE_PATH)Kernel/
 RELATIVE_OUTPUT_PATH := Kernel/
 
 ASM_FLAGS := -f bin
-C++_FLAGS := -std=c++23 -m64 -c -nostdlib -fno-builtin -nostdinc -O2 -fno-stack-protector
+C++_FLAGS := -std=c++23 -m64 -c -nostdlib -fno-builtin -nostdinc -O2 -fno-stack-protector -Werror
 LD_FLAGS :=
+OBJCOPY_FLAGS := -I binary -g -S -O binary
 
 export CURRENT_WORK_PATH
 export ASM_FLAGS C++_FLAGS LD_FLAGS
@@ -23,19 +24,19 @@ SUBDIRS := Kernel Graphics Shell Lib Memory
 .PHONY: all
 all: MakeDirectory Build
 
-.PHONY: MakeDirectory
 MakeDirectory:
-ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)),)
+ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)), )
 	@mkdir $(CURRENT_OUTPUT_PATH)
 endif
-ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)),)
+ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)), )
 	@mkdir $(CURRENT_INTERMEDIATE_PATH)
 endif
 
-.PHONY: Build
 Build: Subdir
 	@printf "\tLD\t%s\n" Kernel.bin
-	@$(LD) $(OBJECT) $(LD_FLAGS) -T Kernel.lds -o $(CURRENT_OUTPUT_PATH)Kernel.bin
+	@$(LD) $(OBJECT) $(LD_FLAGS) -T Kernel.lds -o $(CURRENT_INTERMEDIATE_PATH)Kernel.bin
+	@printf "\tOBJCOPY\t%s\n" Kernel
+	@$(OBJCOPY) $(CURRENT_INTERMEDIATE_PATH)Kernel.bin $(OBJCOPY_FLAGS) $(CURRENT_OUTPUT_PATH)Kernel
 
 Subdir: $(SUBDIRS)
 	@set -e; for i in $(SUBDIRS); do $(MAKE) -C $$i; done

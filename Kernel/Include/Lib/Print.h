@@ -9,14 +9,20 @@
 #define __LIB_PRINT_H__
 
 #include <Lib/String.h>
-#include <stdarg.h>
+#include <Stdarg.h>
 
 namespace Lib
 {
-	uint8_t printf(char* buffer, const char* string, ...);
-
-	uint8_t format(char* buffer, const char* format, va_list args);
-	char* itoa(char* buffer, uint64_t number, uint8_t base, uint8_t precision);
+	/**
+	 *
+	 * @param buffer 缓冲区
+	 * @param string 未格式化的字符串
+	 * @param args 字符串占位符参数
+	 * @return 实际打印的字符串长度
+	 */
+	uint8_t PrintfToBuffer(char* buffer, const char* string, va_list args);
+	uint8_t FormatParse(char* buffer, const char* format, va_list args);
+	uint8_t itoa(char* buffer, uint64_t number, uint8_t base, uint8_t precision);
 }
 
 #endif

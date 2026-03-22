@@ -14,16 +14,14 @@ OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(__OBJECT))
 .PHONY: all
 all: MakeDirectory Build
 
-.PHONY: MakeDirectory
 MakeDirectory:
-ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)),)
+ifeq ($(wildcard $(CURRENT_OUTPUT_PATH)), )
 	@mkdir $(CURRENT_OUTPUT_PATH)
 endif
-ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)),)
+ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)), )
 	@mkdir $(CURRENT_INTERMEDIATE_PATH)
 endif
 
-.PHONY: Build
 Build: $(__OBJECT)
 	@printf "\tAR\t%s\n" $(RELATIVE_OUTPUT_PATH)Kernel.a
 	@ar rcs $(CURRENT_INTERMEDIATE_PATH)Kernel.a $(OBJECT)

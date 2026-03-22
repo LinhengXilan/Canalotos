@@ -6,20 +6,18 @@
 CURRENT_INTERMEDIATE_PATH := $(INTERMEDIATE_PATH)Kernel/Lib/
 RELATIVE_OUTPUT_PATH := Lib/
 
-__OBJECT := String.o Print.o
+__OBJECT := String.o Print.o Memory.o
 _OBJECT := $(addprefix $(RELATIVE_OUTPUT_PATH), $(__OBJECT))
 OBJECT := $(addprefix $(CURRENT_INTERMEDIATE_PATH), $(__OBJECT))
 
 .PHONY: all
 all: MakeDirectory Build
 
-.PHONY: MakeDirectory
 MakeDirectory:
-ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)),)
+ifeq ($(wildcard $(CURRENT_INTERMEDIATE_PATH)), )
 	@mkdir $(CURRENT_INTERMEDIATE_PATH)
 endif
 
-.PHONY: Build
 Build: $(__OBJECT)
 	@printf "\tAR\t%s\n" $(RELATIVE_OUTPUT_PATH)Lib.a
 	@ar rcs $(CURRENT_INTERMEDIATE_PATH)Lib.a $(OBJECT)

@@ -11,18 +11,33 @@
 #include <Type.h>
 #include <Graphics/Graphics.h>
 
-class Shell
+namespace Shell
 {
-public:
-	explicit Shell(Graphics* graphics);
-	Shell(Graphics* graphics, uint32_t backgroundColor, uint32_t textColor);
-	~Shell() = default;
+	struct DisplayData
+	{
+		Graphics* graphics = nullptr;
+		char buffer[65536];
+		uint16_t bufferSize = 0;
+		uint16_t index = 0;
+		uint8_t printablePerRow = 0;
+		uint8_t printablePerColumn = 0;
+		uint8_t cursorX = 0;
+		uint8_t cursorY = 0;
+		uint32_t backgroundColor = 0x00000000;
+		uint32_t textColor = 0xFFFFFFFF;
+	};
 
-public:
+	struct Data
+	{
+		DisplayData displayData;
+	};
+
+	void Init(Graphics* graphics);
+	void Init(Graphics* graphics, uint32_t backgroundColor, uint32_t textColor);
+
 	void SetBackgroundColor(uint32_t color);
 	void SetTextColor(uint32_t color);
 
-public:
 	/**
 	 * @param ch ascii字符
 	 *
@@ -35,24 +50,10 @@ public:
 	 * @note 请保证字符串大小小于65535
 	 */
 	void PutString(const char* string);
-	template<typename... Args>
-	void Print(const char* string, Args... args);
-private:
+	void Print(const char* string, ...);
 	void Write();
+}
 
-private:
-	Graphics* m_Graphics;
-	char m_Buffer[65536];
-	uint16_t m_BufferSize;
-	uint16_t m_Index = 0;
-	uint8_t m_PrintablePerRow;
-	uint8_t m_PrintablePerColumn;
-	uint8_t m_CursorX = 0;
-	uint8_t m_CursorY = 0;
-	uint32_t m_BackgroundColor = 0x00000000;
-	uint32_t m_TextColor = 0xFFFFFFFF;
-};
-
-#include <Shell/Shell.inl>
+//#include <Shell/Shell.inl>
 
 #endif

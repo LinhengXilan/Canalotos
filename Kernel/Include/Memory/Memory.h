@@ -14,46 +14,48 @@
 extern uint8_t _Text;
 extern uint8_t _Data;
 
-enum class MemoryPageType : uint8_t
+namespace Memory
 {
-	Unusable,
-	System, User,
-	UEFI
-};
+	enum class MemoryPageType : uint8_t
+	{
+		Unusable,
+		System, User,
+		UEFI
+	};
 
-enum class MemoryPageAttitude : uint8_t
-{
-	None
-};
+	enum class MemoryPageAttitude : uint8_t
+	{
+		None
+	};
 
-/**
- * @brief 4KB内存页
- */
-struct MemoryPageDescriptor
-{
-    address_t Address = 0;
-	MemoryPageType Type = MemoryPageType::Unusable;
-	MemoryPageAttitude Attitude = MemoryPageAttitude::None;
-};
+	/**
+	 * @brief 4KB内存页
+	 */
+	struct MemoryPageDescriptor
+	{
+		address_t Address = 0;
+		MemoryPageType Type = MemoryPageType::Unusable;
+		MemoryPageAttitude Attitude = MemoryPageAttitude::None;
+	};
 
-/**
- * @brief 整个可用内存
- */
+	/**
+	 * @brief 整个可用内存
+	 */
 
-class MemoryDescriptor
-{
-public:
-	MemoryDescriptor(const EFIDataMemory& efiMemory);
-	~MemoryDescriptor() = default;
+	struct MemoryDescriptorData
+	{
+		MemoryPageDescriptor* memoryPageDescriptor;
+		address_t kernelCodeAddress = 0;
+		address_t kernelDataAddress = 0;
+		uint32_t pageCount = 0;
+	};
 
-	MemoryPageDescriptor* GetPageDescriptor() const;
-	MemoryPageDescriptor* GetPageDescriptor(uint32_t index) const;
-
-private:
-	MemoryPageDescriptor* m_MemoryPageDescriptor;
-	address_t m_KernelCodeAddress = 0;
-	address_t m_KernelDataAddress = 0;
-	uint32_t m_PageCount = 0;
-};
+	namespace MemoryDescriptor
+	{
+		void Init(const EFIDataMemory& efiMemory);
+		MemoryPageDescriptor* GetPageDescriptor();
+		MemoryPageDescriptor* GetPageDescriptor(uint32_t index);
+	}
+}
 
 #endif

@@ -9,13 +9,10 @@
 
 namespace Lib
 {
-	uint8_t printf(char* buffer, const char* string, ...)
+	uint8_t PrintfToBuffer(char* buffer, const char* string, va_list args)
 	{
 		char lbuffer[256];
-		va_list args;
-		va_start(args, string);
-		uint8_t length = format(lbuffer, string, args);
-		va_end(args);
+		uint8_t length = FormatParse(lbuffer, string, args);
 		for (int i = 0; i < length; i++)
 		{
 			buffer[i] = lbuffer[i];
@@ -23,7 +20,7 @@ namespace Lib
 		return length;
 	}
 
-	uint8_t format(char* buffer, const char* format, va_list args)
+	uint8_t FormatParse(char* buffer, const char* format, va_list args)
 	{
 		char* l_Buffer = buffer;
 		bool flagFormat = false;
@@ -48,19 +45,21 @@ namespace Lib
 				case 'b':
 					if (flagLong)
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint64_t), 2, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint64_t), 2, precision);
 					}
 					else
 					{
-						l_Buffer = itoa(l_Buffer, static_cast<uint32_t>(va_arg(args, uint64_t)), 2, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint32_t), 2, precision);
 					}
 					flagFormat = false;
 					flagLong = false;
 					precision = 1;
 					break;
 				case 'c':
-					flagLong = false;
 					*l_Buffer++ = static_cast<char>(va_arg(args, uint32_t));
+					flagLong = false;
+					flagFormat = false;
+					precision = 1;
 					break;
 				case 'd':
 					if (flagLong)
@@ -69,24 +68,24 @@ namespace Lib
 						if (n < 0)
 						{
 							*l_Buffer++ = '-';
-							l_Buffer = itoa(l_Buffer, -n, 10, precision);
+							l_Buffer += itoa(l_Buffer, -n, 10, precision);
 						}
 						else
 						{
-							l_Buffer = itoa(l_Buffer, n, 10, precision);
+							l_Buffer += itoa(l_Buffer, n, 10, precision);
 						}
 					}
 					else
 					{
-						int32_t n = va_arg(args, int32_t);
+						int64_t n = va_arg(args, int32_t);
 						if (n < 0)
 						{
 							*l_Buffer++ = '-';
-							l_Buffer = itoa(l_Buffer, -n, 10, precision);
+							l_Buffer += itoa(l_Buffer, -n, 10, precision);
 						}
 						else
 						{
-							l_Buffer = itoa(l_Buffer, n, 10, precision);
+							l_Buffer += itoa(l_Buffer, n, 10, precision);
 						}
 					}
 					flagFormat = false;
@@ -99,11 +98,11 @@ namespace Lib
 				case 'o':
 					if (flagLong)
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint64_t), 8, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint64_t), 8, precision);
 					}
 					else
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint32_t), 8, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint32_t), 8, precision);
 					}
 					flagFormat = false;
 					flagLong = false;
@@ -111,23 +110,23 @@ namespace Lib
 					break;
 				case 's':
 					{
-						flagFormat = false;
 						char* str = reinterpret_cast<char*>(va_arg(args, address_t));
 						while (*str)
 						{
 							*l_Buffer++ = *str;
 							str++;
 						}
+						flagFormat = false;
 						break;
 					}
 				case 'u':
 					if (flagLong)
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint64_t), 10, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint64_t), 10, precision);
 					}
 					else
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint32_t), 10, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint32_t), 10, precision);
 					}
 					flagFormat = false;
 					flagLong = false;
@@ -136,11 +135,11 @@ namespace Lib
 				case 'x':
 					if (flagLong == true)
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint64_t), 16, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint64_t), 16, precision);
 					}
 					else
 					{
-						l_Buffer = itoa(l_Buffer, va_arg(args, uint32_t), 16, precision);
+						l_Buffer += itoa(l_Buffer, va_arg(args, uint32_t), 16, precision);
 					}
 					flagFormat = false;
 					flagLong = false;
@@ -155,15 +154,17 @@ namespace Lib
 				format++;
 				continue;
 			}
+			// 复制字符
 			*l_Buffer++ = *format;
 			format++;
 		}
 		return l_Buffer - buffer;
 	}
 
-	char* itoa(char* buffer, uint64_t number, uint8_t base, uint8_t precision)
+	uint8_t itoa(char* buffer, uint64_t number, uint8_t base, uint8_t precision)
 	{
 		char tempBuffer[64];
+		char* ptr = buffer;
 		uint64_t tempNumber = number;
 		int n = 0;
 		while (tempNumber > 0)
@@ -172,15 +173,16 @@ namespace Lib
 			tempBuffer[n++] = mod < 10 ? '0' + mod : 'A' + mod - 10;
 			tempNumber /= base;
 		}
+
 		while (precision > n)
 		{
 			tempBuffer[n++] = '0';
 		}
-		for (int i = 1; i <= n; i++)
+
+		for (int i = 1; i <= n; ++i)
 		{
-			*buffer = tempBuffer[n - i];
-			buffer++;
+			*ptr++ = tempBuffer[n - i];
 		}
-		return buffer;
+		return n;
 	}
 }
